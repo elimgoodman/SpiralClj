@@ -101,3 +101,28 @@ a
 (ns foo)
 (def a (ns foo))
 a
+(re-find #"<\(include \"[^\"+]\")>" "goo")
+(re-find #"<\(include \"[^\"+]\"\)>" "goo")
+(re-find #"<\(include \"[^\"+]\"\)>" "foo<(include \"boop\")>")
+(re-fine #'<\(include "(.+)"\)>' '<(include "boop")>)
+"hello
+"
+'hello'
+(re-fine #"<\(include \"(.+)\"\)>" "<(include \"boop\")>")
+(re-find #"<\(include \"(.+)\"\)>" "<(include \"boop\")>")
+(re-find #"<\(include \"(.+)\"\)>" "foo<(include \"boop\")>")
+(re-find #"<\(include \"(.+)\"\)>" "foo<(include \"boop\")><(include \"beep\")>")
+(re-find #"<\(include \"([^"]+)\"\)>" "foo<(include \"boop\")><(include \"beep\")>")
+"
+(re-find #"<\(include \"([^\"]+)\"\)>" "foo<(include \"boop\")><(include \"beep\")>")
+(re-seq #"<\(include \"([^\"]+)\"\)>" "foo<(include \"boop\")><(include \"beep\")>")
+(second [1 2])
+(partial + 1)
+((partial + 1) 2)
+(concat [1] [2] [3])
+(def a [{:a [1 2 3]} {:a [4, 5, 6]}])
+a
+(reduce #(concat (:a %)) a)
+(reduce conj a)
+(reduce #(conj (:a %1) (:a %2)) a)
+(reduce #(concat (:a %1) (:a %2)) a)

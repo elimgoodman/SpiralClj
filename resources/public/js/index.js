@@ -434,7 +434,7 @@ $(function() {
         values: {
             url: '/foo',
             layout: 'default_page',
-            body: '<h1>Stuff<h1><div><(include "badge")></div>'
+            body: '<h1>Stuff<h1><div><(include "header")><(include "badge")></div>'
         }
     }));
 
@@ -451,6 +451,14 @@ $(function() {
         values: {
             name: 'another',
             body: 'body {background: red;}'
+        }
+    }));
+
+    styles.get('instances').push(new S.Instance({
+        parent: styles,
+        values: {
+            name: 'header',
+            body: 'h1 {color: yellow;}'
         }
     }));
 
@@ -497,7 +505,16 @@ $(function() {
         values: {
             name: 'badge',
             body: '<span class="badge">BADGE</span>',
-            styles: ['badge']
+            styles: ['badge', 'another']
+        }
+    }));
+
+    partials.get('instances').push(new S.Instance({
+        parent: partials,
+        values: {
+            name: 'header',
+            body: '<h1>BIG ASS HEADER</h1>',
+            styles: ['header']
         }
     }));
 

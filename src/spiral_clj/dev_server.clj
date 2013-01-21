@@ -19,12 +19,15 @@
         layout-for-page (:layout page)]
     (first (filter #(= (:name %) layout-for-page) layouts))))
 
-(defn get-styles [instance]
-  (let [styles (get-instances :styles)
-        styles-for-instance (:styles instance)]
+(defn hydrate-styles [style-names]
+  (let [styles (get-instances :styles)]
     (filter (fn [style]
-              (some #(= (:name style) %) styles-for-instance))
+              (some #(= (:name style) %) style-names))
               styles)))
+
+(defn get-styles [instance]
+  (let [styles-for-instance (:styles instance)]
+    (hydrate-styles styles-for-instance)))
 
 (defn make-style-block [style]
   (let [body (:body style)]
@@ -43,15 +46,34 @@
         body-tmpl (fleet [include] body)]
     (body-tmpl include-partial)))
 
+(defn get-partial-names-in-body [body]
+  (let [matches (re-seq #"<\(include \"([^\"]+)\"\)>" body)]
+    (map second matches)))
+
+(defn get-partials-in-page [page]
+  (let [body (:body page)
+        all-partials (get-instances :partials)
+        partial-names (get-partial-names-in-body body)
+        find (partial find-partial-by-name all-partials)]
+    (map find partial-names)))
+
+(defn get-style-names-from-partials [partials]
+  (let [all-styles (map :styles partials)]
+    (reduce conj all-styles)))
+
 (defn get-body-for-page [page]
   (let [page-content (get-content-for-page page)
+        partials-included (get-partials-in-page page)
         layout (get-layout-for-page page)
         layout-body (:body layout)
         layout-tmpl (fleet [content styles] layout-body)
         page-styles (get-styles page)
         layout-styles (get-styles layout)
-        styles (distinct (concat page-styles layout-styles))
+        partial-style-names (get-style-names-from-partials partials-included)
+        partial-styles (hydrate-styles partial-style-names)
+        styles (distinct (concat page-styles layout-styles partial-styles))
         style-blocks (make-style-blocks styles)]
+    (println partials-included)
     (str (layout-tmpl page-content style-blocks))))
 
 (defn response-from-page [page]
