@@ -33,6 +33,7 @@
                (js "codemirror")
                (js "mode/xml")
                (js "index")
+               (include-css "/css/codemirror.css")
                (include-css "/css/index.css")]
               [:body
                [:ul#concept-list]

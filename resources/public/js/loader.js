@@ -6,6 +6,9 @@
 
     Loader.prototype = {
         load: function(files, cb) {
+            //This doesn't appear to be working quite right...
+            return cb();
+
             var self = this;
             
             var total_files = files.js.length + files.css.length;
