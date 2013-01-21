@@ -4,19 +4,25 @@
         [noir.response :only [json]]
         [hiccup.page :only [include-css html5 include-js]]))
 
+(def my-server (ref nil))
+
 (defpage [:post "/run"] {:as body}
          (let [instances (:instances body)
                pages (:pages instances)
                partials (:partials instances)
                layouts (:layouts instances)]
-           (println pages)
+           (dosync (ref-set my-server (server/start 5000)))
            (json {:success true})))
 
+(defpage [:post "/stop"] {:as body}
+         (dosync (alter my-server server/stop))
+         (json {:success true}))
+
 (defpartial js [file]
-  (include-js (str "/js/" file ".js")))
+            (include-js (str "/js/" file ".js")))
 
 (defpartial ajax-link [id text]
-  [:a {:id id :href "#"} text])
+            [:a {:id id :href "#"} text])
 
 (defpartial js-template [id & content]
             [:script {:id id :type "text/html"} content])
@@ -25,7 +31,7 @@
   (str "<%= " variable " %>"))
 
 (defpage "/" []
-            (html5
+         (html5
               [:head
                (js "jquery")
                (js "underscore")
@@ -38,7 +44,8 @@
                [:ul#instance-list]
                [:div#editor]
                [:div (ajax-link "add-instance-link" "Add")]
-               [:div (ajax-link "save-link" "Save")]
+               [:div (ajax-link "save-link" "Run")]
+               [:div (ajax-link "stop-link" "Stop")]
               ]
               (js-template "concept-list-tmpl" (js-var "display_name"))
               (js-template "instance-list-tmpl" "inst")

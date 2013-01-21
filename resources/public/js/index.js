@@ -197,7 +197,7 @@ $(function() {
         }
     });
 
-    S.SaveLink = Backbone.View.extend({
+    S.RunLink = Backbone.View.extend({
         el: $("#save-link"),
         events: {
             'click': 'save'
@@ -212,6 +212,16 @@ $(function() {
             });
 
             $.post("/run", {instances: data});
+        }
+    });
+
+    S.StopLink = Backbone.View.extend({
+        el: $("#stop-link"),
+        events: {
+            'click': 'stop'
+        },
+        stop: function(e) {
+            $.post("/stop");
         }
     });
 
@@ -376,7 +386,8 @@ $(function() {
     S.TheConceptList = new S.ConceptList();
     S.TheInstanceList = new S.InstanceList();
     S.TheAddInstanceLink = new S.AddInstanceLink();
-    S.TheSaveLink = new S.SaveLink();
+    S.TheRunLink = new S.RunLink();
+    S.TheStopLink = new S.StopLink();
     S.TheEditor = new S.Editor();
     
     S.CurrentConcept.set(S.Concepts.at(0));
