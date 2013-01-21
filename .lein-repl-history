@@ -20,3 +20,39 @@ foo
 (set! foo 1)
 (ref bar (atom nil))
 (def server (ref nil))
+(defn foo [] (println "hi"))
+(foo)
+#'foo
+(#'foo)
+(var foo)
+(def a {0 "foo" 1 "bar"})
+a
+(first a)
+(keys a)
+(vals a)
+(def a {:foo "bar" :baz "beep"})
+(find)
+find
+(find a :foo)
+a
+(def a [{:foo "bar" :baz "beep"}, {:foo "burp"}])
+(filter a (fn [f] (= (:foo f) "bar")))
+(filter (vals a) (fn [f] (= (:foo f) "bar")))
+(def a [{:foo "bar" :baz "beep"}, {:foo "burp"}])
+(filter (fn [f] (= (:foo f) "bar")) a)
+(head (filter (fn [f] (= (:foo f) "bar")) a))
+(first (filter (fn [f] (= (:foo f) "bar")) a))
+(first (filter (fn [f] (= (:foo f) "barrrr")) a))
+#()
+#([f] (+ 1 2))
+#(f (+ 1 2))
+# (+ 1 2))
+#(+ 1 1)
+a
+(first #(= (:foo %) "bar") a))
+(filter #(= (:foo %) "bar") a)
+(declare foo)
+foo
+(def foo "a")
+(def a {:foo {0 {:beep "boop"}}})
+a

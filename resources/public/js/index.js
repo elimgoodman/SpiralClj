@@ -197,12 +197,16 @@ $(function() {
         }
     });
 
-    S.RunLink = Backbone.View.extend({
+    S.SaveLink = Backbone.View.extend({
         el: $("#save-link"),
         events: {
             'click': 'save'
         },
         save: function(e) {
+            if(S.CurrentInstance.get()) {
+                S.TheEditor.save();
+            }
+
             var data = {};
 
             S.Concepts.each(function(c){
@@ -211,7 +215,17 @@ $(function() {
                 });
             });
 
-            $.post("/run", {instances: data});
+            $.post("/save", {instances: data});
+        }
+    });
+
+    S.RunLink = Backbone.View.extend({
+        el: $("#run-link"),
+        events: {
+            'click': 'run'
+        },
+        run: function(e) {
+            $.post("/run");
         }
     });
 
@@ -388,6 +402,7 @@ $(function() {
     S.TheAddInstanceLink = new S.AddInstanceLink();
     S.TheRunLink = new S.RunLink();
     S.TheStopLink = new S.StopLink();
+    S.TheSaveLink = new S.SaveLink();
     S.TheEditor = new S.Editor();
     
     S.CurrentConcept.set(S.Concepts.at(0));

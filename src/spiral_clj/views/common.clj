@@ -3,29 +3,13 @@
             [ring.adapter.jetty :as jetty])
   (:use [noir.core :only [defpartial defpage]]
         [noir.response :only [json]]
+        [spiral-clj.dev_server :only [my-instances]]
         [hiccup.page :only [include-css html5 include-js]]))
 
-(def my-server (ref nil))
-
-(defn handler [request]
-  {:status 200
-   :headers {"Content-Type" "text/html"}
-   :body "Hello World"})
-
-(defn start-server []
-  (jetty/run-jetty #'handler {:port 4000 :join? false}))
-
-(defpage [:post "/run"] {:as body}
-         (let [instances (:instances body)
-               pages (:pages instances)
-               partials (:partials instances)
-               layouts (:layouts instances)]
-           (dosync (ref-set my-server (start-server)))
+(defpage [:post "/save"] {:as body}
+         (let [instances (:instances body)]
+           (dosync (ref-set my-instances instances))
            (json {:success true})))
-
-(defpage [:post "/stop"] {:as body}
-         (dosync (alter my-server (fn [s] (.stop s))))
-         (json {:success true}))
 
 (defpartial js [file]
             (include-js (str "/js/" file ".js")))
@@ -46,6 +30,8 @@
                (js "underscore")
                (js "backbone")
                (js "loader")
+               (js "codemirror")
+               (js "mode/xml")
                (js "index")
                (include-css "/css/index.css")]
               [:body
@@ -53,8 +39,9 @@
                [:ul#instance-list]
                [:div#editor]
                [:div (ajax-link "add-instance-link" "Add")]
-               [:div (ajax-link "save-link" "Run")]
-               [:div (ajax-link "stop-link" "Stop")]
+               [:div (ajax-link "save-link" "Save")]
+               ;[:div (ajax-link "run-link" "Run")]
+               ;[:div (ajax-link "stop-link" "Stop")]
               ]
               (js-template "concept-list-tmpl" (js-var "display_name"))
               (js-template "instance-list-tmpl" "inst")
