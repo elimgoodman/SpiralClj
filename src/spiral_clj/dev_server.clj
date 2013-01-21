@@ -1,5 +1,6 @@
 (ns spiral-clj.dev_server
-  (:require [ring.adapter.jetty :as jetty])
+  (:require [ring.adapter.jetty :as jetty]
+            [hiccup.core :as hiccup])
   (:use [fleet :only [fleet]]))
 
 (def my-instances (ref {}))
@@ -15,12 +16,28 @@
         layout-for-page (:layout page)]
     (first (filter #(= (:name %) layout-for-page) layouts))))
 
+(defn get-styles-for-page [page]
+  (let [styles (get-instances :styles)
+        styles-for-page (:styles page)]
+    (filter (fn [style]
+              (some #(= (:name style) %) styles-for-page))
+              styles)))
+
+(defn make-style-block [style]
+  (let [body (:body style)]
+    (hiccup/html [:style {:type "text/css"} body])))
+
+(defn make-style-blocks [styles]
+  (apply str (map make-style-block styles)))
+
 (defn get-body-for-page [page]
   (let [page-content (:body page)
         layout (get-layout-for-page page)
         layout-body (:body layout)
-        layout-tmpl (fleet [content] layout-body)]
-    (str (layout-tmpl page-content))))
+        layout-tmpl (fleet [content styles] layout-body)
+        styles (get-styles-for-page page)
+        style-blocks (make-style-blocks styles)]
+    (str (layout-tmpl page-content style-blocks))))
 
 (defn response-from-page [page]
   (let [page? (nil? page)

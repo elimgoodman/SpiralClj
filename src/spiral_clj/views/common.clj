@@ -32,6 +32,7 @@
                (js "loader")
                (js "codemirror")
                (js "mode/xml")
+               (js "mode/css")
                (js "index")
                (include-css "/css/codemirror.css")
                (include-css "/css/index.css")]
@@ -46,15 +47,23 @@
               ]
               (js-template "concept-list-tmpl" (js-var "display_name"))
               (js-template "instance-list-tmpl" "inst")
+              (js-template "style-selector-tmpl" [:select.style])
               (js-template "pages-editor"
                            [:ul
                             [:li
                              [:label "URL: "][:input.url]]
                             [:li
-                             [:label "Layout "][:select.layout]]
+                             [:label "Styles: "][:ul.styles]
+                             [:a.add-style-link {:href "#"} "Add"]]
+                            [:li
+                             [:label "Layout: "][:select.layout]]
                             [:li
                              [:label "Body "][:textarea.body]]])
               (js-template "layouts-editor"
+                           [:ul
+                            [:li "Name: " [:input.name]]
+                            [:li "Body: " [:textarea.body]]])
+              (js-template "styles-editor"
                            [:ul
                             [:li "Name: " [:input.name]]
                             [:li "Body: " [:textarea.body]]])

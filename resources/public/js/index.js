@@ -295,7 +295,7 @@ $(function() {
         name: 'pages',
         display_name: 'Pages',
         id_field: 'url',
-        fields: ['url', 'body', 'layout'],
+        fields: ['url', 'body', 'styles', 'layout'],
         editor_js: ["/js/codemirror.js", "/js/mode/xml.js"],
         editor_css: ["/css/codemirror.css"],
         load: function(root, values) {
@@ -303,7 +303,31 @@ $(function() {
 
             var body = root.find('.body');
             body.val(values.body);
+
+            //Styles
+            var style_selector = $($("#style-selector-tmpl").html());
+
+            S.Concepts.find(function(c){
+                return c.get('name') == 'styles';
+            }).get('instances').each(function(i){
+                var name = i.get('values')['name'];
+                var option = $("<option>").attr('value', name).html(name);
+                style_selector.append(option);
+            });
             
+            _.each(values.styles, function(s) {
+                var selector = style_selector.clone();
+                selector.val(s);
+                var styles_li = $("<li>").append(selector);
+                root.find(".styles").append(styles_li);
+            });
+
+            root.find(".add-style-link").click(function() {
+                var styles_li = $("<li>").append(style_selector.clone());
+                root.find(".styles").append(styles_li);
+            });
+
+            //Layouts
             var layout_select = root.find('.layout');
 
             S.Concepts.find(function(c){
@@ -329,6 +353,9 @@ $(function() {
             return {
                 url: root.find('.url').val(),
                 body: this.cm.getValue(),
+                styles: _.map(root.find('.style'), function(s){
+                    return $(s).val();
+                }),
                 layout: root.find('.layout').val()
             };
         }
@@ -359,12 +386,36 @@ $(function() {
             };
         },
     });
+
+    var styles = new S.Concept({
+        name: 'styles',
+        display_name: 'Styles',
+        id_field: 'name',
+        fields: ['name', 'body'],
+        load: function(root, values) {
+            root.find('.name').val(values.name);
+
+            var body = root.find('.body');
+            body.val(values.body);
+
+            this.cm = CodeMirror.fromTextArea(body.get(0), {
+                mode: 'css',
+                lineNumbers: true
+            });
+        },
+        save: function(root) {
+            return {
+                name: root.find('.name').val(),
+                body: this.cm.getValue(),
+            };
+        },
+    });
     
     layouts.get('instances').push(new S.Instance({
         parent: layouts,
         values: {
             name: 'default_page',
-            body: '<div id="content"><(str content)></div>'
+            body: '<html><head><(str styles)></head><body><div id="content"><(str content)></div></body>'
         }
     }));
 
@@ -374,6 +425,22 @@ $(function() {
             url: '/foo',
             layout: 'default_page',
             body: 'Hello world!'
+        }
+    }));
+
+    styles.get('instances').push(new S.Instance({
+        parent: styles,
+        values: {
+            name: 'index',
+            body: '* {color: green;}'
+        }
+    }));
+
+    styles.get('instances').push(new S.Instance({
+        parent: styles,
+        values: {
+            name: 'another',
+            body: 'body {background: red;}'
         }
     }));
 
@@ -395,7 +462,7 @@ $(function() {
         }
     });
 
-    S.Concepts.reset([layouts, pages, partials]);
+    S.Concepts.reset([pages, layouts, partials, styles]);
 
     S.TheConceptList = new S.ConceptList();
     S.TheInstanceList = new S.InstanceList();
