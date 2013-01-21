@@ -364,7 +364,7 @@ $(function() {
         parent: layouts,
         values: {
             name: 'default_page',
-            body: '<div id="content"><%= content %></div>'
+            body: '<div id="content"><(str content)></div>'
         }
     }));
 

@@ -56,3 +56,24 @@ foo
 (def foo "a")
 (def a {:foo {0 {:beep "boop"}}})
 a
+(require '[fleet :as f])
+f
+(require '[fleet :as f])
+f
+(require '[fleet :as f])
+(f)
+f/fleet
+(f/fleet "foo <( bar )>")
+(f/fleet [bar] "foo <( bar )>")
+(def a (f/fleet [bar] "foo <( bar )>"))
+a
+(a "beep")
+(prinln (a "beep")
+)
+(println (a "beep"))
+((def footer (fleet "<p>&copy; <(year (now))> Your Company</p>")
+))
+(def footer (fleet "<p>&copy; <(year (now))> Your Company</p>"))
+(def footer (f/fleet "<p>&copy; <(year (now))> Your Company</p>"))
+(def header (f/fleet [title] "<head><title><(str title)></title></head>"))
+(println (header "Main Page"))
