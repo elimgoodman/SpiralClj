@@ -94,3 +94,10 @@ a
 a
 (str ((f/fleet [aaa] "<(str a)>") 1))
 (str ((f/fleet [aaa] "<(str aaa)>") 1))
+(conj ["a"] ["b"])
+(cons ["a"] ["b"])
+(concat ["a"] ["b"])
+(distinct ["a" "a" "b"])
+(ns foo)
+(def a (ns foo))
+a

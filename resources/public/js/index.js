@@ -291,6 +291,31 @@ $(function() {
         }
     });
 
+    //uhh
+    var style_binding = function(root, values) {
+        var style_selector = $($("#style-selector-tmpl").html());
+
+        S.Concepts.find(function(c){
+            return c.get('name') == 'styles';
+        }).get('instances').each(function(i){
+            var name = i.get('values')['name'];
+            var option = $("<option>").attr('value', name).html(name);
+            style_selector.append(option);
+        });
+
+        _.each(values.styles, function(s) {
+            var selector = style_selector.clone();
+            selector.val(s);
+            var styles_li = $("<li>").append(selector);
+            root.find(".styles").append(styles_li);
+        });
+
+        root.find(".add-style-link").click(function() {
+            var styles_li = $("<li>").append(style_selector.clone());
+            root.find(".styles").append(styles_li);
+        });
+    };
+
     var pages = new S.Concept({
         name: 'pages',
         display_name: 'Pages',
@@ -303,29 +328,8 @@ $(function() {
 
             var body = root.find('.body');
             body.val(values.body);
-
-            //Styles
-            var style_selector = $($("#style-selector-tmpl").html());
-
-            S.Concepts.find(function(c){
-                return c.get('name') == 'styles';
-            }).get('instances').each(function(i){
-                var name = i.get('values')['name'];
-                var option = $("<option>").attr('value', name).html(name);
-                style_selector.append(option);
-            });
             
-            _.each(values.styles, function(s) {
-                var selector = style_selector.clone();
-                selector.val(s);
-                var styles_li = $("<li>").append(selector);
-                root.find(".styles").append(styles_li);
-            });
-
-            root.find(".add-style-link").click(function() {
-                var styles_li = $("<li>").append(style_selector.clone());
-                root.find(".styles").append(styles_li);
-            });
+            style_binding(root, values);
 
             //Layouts
             var layout_select = root.find('.layout');
@@ -365,10 +369,13 @@ $(function() {
         name: 'layouts',
         display_name: 'Layouts',
         id_field: 'name',
-        fields: ['name', 'body'],
+        fields: ['name', 'styles', 'body'],
         editor_js: ["/js/codemirror.js", "/js/mode/xml.js"],
         editor_css: ["/css/codemirror.css"],
         load: function(root, values) {
+
+            style_binding(root, values);
+
             root.find('.name').val(values.name);
 
             var body = root.find('.body');
@@ -383,6 +390,9 @@ $(function() {
             return {
                 name: root.find('.name').val(),
                 body: this.cm.getValue(),
+                styles: _.map(root.find('.style'), function(s){
+                    return $(s).val();
+                })
             };
         },
     });
@@ -424,7 +434,7 @@ $(function() {
         values: {
             url: '/foo',
             layout: 'default_page',
-            body: 'Hello world!'
+            body: '<h1>Stuff<h1><div><(include "badge")></div>'
         }
     }));
 
@@ -444,23 +454,52 @@ $(function() {
         }
     }));
 
+    styles.get('instances').push(new S.Instance({
+        parent: styles,
+        values: {
+            name: 'badge',
+            body: '.badge {border: 1px solid black; padding: 3px;}'
+        }
+    }));
+
     var partials = new S.Concept({
         name: 'partials',
         display_name: 'Partials',
 
         id_field: 'name',
-        fields: ['name', 'body'],
+        fields: ['name', 'body', 'styles'],
         load: function(root, values) {
+            style_binding(root, values);
+
             root.find('.name').val(values.name);
-            root.find('.body').val(values.body);
+
+            var body = root.find('.body');
+            body.val(values.body);
+
+            this.cm = CodeMirror.fromTextArea(body.get(0), {
+                mode: 'xml',
+                lineNumbers: true
+            });
         },
         save: function(root) {
             return {
                 name: root.find('.name').val(),
-                body: root.find('.body').val()
+                body: this.cm.getValue(),
+                styles: _.map(root.find('.style'), function(s){
+                    return $(s).val();
+                })
             };
         }
     });
+
+    partials.get('instances').push(new S.Instance({
+        parent: partials,
+        values: {
+            name: 'badge',
+            body: '<span class="badge">BADGE</span>',
+            styles: ['badge']
+        }
+    }));
 
     S.Concepts.reset([pages, layouts, partials, styles]);
 

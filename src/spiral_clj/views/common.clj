@@ -62,6 +62,9 @@
               (js-template "layouts-editor"
                            [:ul
                             [:li "Name: " [:input.name]]
+                            [:li
+                             [:label "Styles: "][:ul.styles]
+                             [:a.add-style-link {:href "#"} "Add"]]
                             [:li "Body: " [:textarea.body]]])
               (js-template "styles-editor"
                            [:ul
@@ -70,4 +73,6 @@
               (js-template "partials-editor"
                            [:ul
                             [:li "Name: " [:input.name]]
+                            [:li
+                             [:label "Styles: "][:ul.styles]]
                             [:li "Body: " [:textarea.body]]])))

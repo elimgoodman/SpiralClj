@@ -11,16 +11,19 @@
 (defn find-page-by-url [pages url]
   (first (filter #(= (:url %) url) pages)))
 
+(defn find-partial-by-name [partials name]
+  (first (filter #(= (:name %) name) partials)))
+
 (defn get-layout-for-page [page]
   (let [layouts (get-instances :layouts)
         layout-for-page (:layout page)]
     (first (filter #(= (:name %) layout-for-page) layouts))))
 
-(defn get-styles-for-page [page]
+(defn get-styles [instance]
   (let [styles (get-instances :styles)
-        styles-for-page (:styles page)]
+        styles-for-instance (:styles instance)]
     (filter (fn [style]
-              (some #(= (:name style) %) styles-for-page))
+              (some #(= (:name style) %) styles-for-instance))
               styles)))
 
 (defn make-style-block [style]
@@ -30,12 +33,24 @@
 (defn make-style-blocks [styles]
   (apply str (map make-style-block styles)))
 
+(defn include-partial [partial-name]
+  (let [partials (get-instances :partials)
+        partial (find-partial-by-name partials partial-name)]
+    (:body partial)))
+
+(defn get-content-for-page [page]
+  (let [body (:body page)
+        body-tmpl (fleet [include] body)]
+    (body-tmpl include-partial)))
+
 (defn get-body-for-page [page]
-  (let [page-content (:body page)
+  (let [page-content (get-content-for-page page)
         layout (get-layout-for-page page)
         layout-body (:body layout)
         layout-tmpl (fleet [content styles] layout-body)
-        styles (get-styles-for-page page)
+        page-styles (get-styles page)
+        layout-styles (get-styles layout)
+        styles (distinct (concat page-styles layout-styles))
         style-blocks (make-style-blocks styles)]
     (str (layout-tmpl page-content style-blocks))))
 
