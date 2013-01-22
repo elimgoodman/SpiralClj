@@ -4,11 +4,13 @@
   (:use [noir.core :only [defpartial defpage]]
         [noir.response :only [json]]
         [spiral-clj.dev_server :only [my-instances]]
+        [spiral-clj.serializer :only [serialize-instances]]
         [hiccup.page :only [include-css html5 include-js]]))
 
 (defpage [:post "/save"] {:as body}
          (let [instances (:instances body)]
            (dosync (ref-set my-instances instances))
+           (serialize-instances instances)
            (json {:success true})))
 
 (defpartial js [file]
