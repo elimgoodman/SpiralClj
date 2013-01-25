@@ -126,3 +126,8 @@ a
 (reduce conj a)
 (reduce #(conj (:a %1) (:a %2)) a)
 (reduce #(concat (:a %1) (:a %2)) a)
+(require '[clojure.contrib.json :as f])
+(require '[clojure.contrib.json :as j])
+(require '[data.json :as j])
+(require '[clojure.data.json :as j])
+(doc print)

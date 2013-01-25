@@ -9,9 +9,12 @@
 
 (defpage [:post "/save"] {:as body}
          (let [instances (:instances body)]
-           (dosync (ref-set my-instances instances))
            (serialize-instances instances)
+           (dosync (ref-set my-instances instances))
            (json {:success true})))
+
+(defpage "/instances" []
+         (json @my-instances))
 
 (defpartial js [file]
             (include-js (str "/js/" file ".js")))

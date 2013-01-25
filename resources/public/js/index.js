@@ -216,6 +216,8 @@ $(function() {
             });
 
             $.post("/save", {instances: data});
+
+            e.preventDefault();
         }
     });
 
@@ -421,55 +423,6 @@ $(function() {
         },
     });
     
-    layouts.get('instances').push(new S.Instance({
-        parent: layouts,
-        values: {
-            name: 'default_page',
-            body: '<html><head><(str styles)></head><body><div id="content"><(str content)></div></body>'
-        }
-    }));
-
-    pages.get('instances').push(new S.Instance({
-        parent: pages,
-        values: {
-            url: '/foo',
-            layout: 'default_page',
-            body: '<h1>Stuff<h1><div><(include "header")><(include "badge")></div>'
-        }
-    }));
-
-    styles.get('instances').push(new S.Instance({
-        parent: styles,
-        values: {
-            name: 'index',
-            body: '* {color: green;}'
-        }
-    }));
-
-    styles.get('instances').push(new S.Instance({
-        parent: styles,
-        values: {
-            name: 'another',
-            body: 'body {background: red;}'
-        }
-    }));
-
-    styles.get('instances').push(new S.Instance({
-        parent: styles,
-        values: {
-            name: 'header',
-            body: 'h1 {color: yellow;}'
-        }
-    }));
-
-    styles.get('instances').push(new S.Instance({
-        parent: styles,
-        values: {
-            name: 'badge',
-            body: '.badge {border: 1px solid black; padding: 3px;}'
-        }
-    }));
-
     var partials = new S.Concept({
         name: 'partials',
         display_name: 'Partials',
@@ -500,24 +453,6 @@ $(function() {
         }
     });
 
-    partials.get('instances').push(new S.Instance({
-        parent: partials,
-        values: {
-            name: 'badge',
-            body: '<span class="badge">BADGE</span>',
-            styles: ['badge', 'another']
-        }
-    }));
-
-    partials.get('instances').push(new S.Instance({
-        parent: partials,
-        values: {
-            name: 'header',
-            body: '<h1>BIG ASS HEADER</h1>',
-            styles: ['header']
-        }
-    }));
-
     S.Concepts.reset([pages, layouts, partials, styles]);
 
     S.TheConceptList = new S.ConceptList();
@@ -530,6 +465,26 @@ $(function() {
     
     S.CurrentConcept.set(S.Concepts.at(0));
     //instance = S.TheAddInstanceLink.addInstance();
+    
+    $.getJSON("/instances", {}, function(data){
+        _.each(data, function(instances, concept_name){
+            var concept = S.Concepts.find(function(c){
+                return c.get('name') == concept_name;
+            });
+            
+            var instance_coll = new S.InstanceCollection();
+            _.each(instances, function(vals){
+                instance_coll.push(new S.Instance({
+                    parent: concept,
+                    values: vals
+                }));
+            });
+
+            concept.set({
+                instances: instance_coll
+            });
+        });
+    });
 
     window.S = S;
 });
