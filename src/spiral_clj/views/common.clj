@@ -41,13 +41,15 @@
                (js "codemirror")
                (js "mode/xml")
                (js "mode/css")
+               (js "chosen")
                (js "index")
                (include-css "/css/reset.css")
+               (include-css "/css/chosen.css")
                (include-css "/css/codemirror.css")
                (less "/css/index.less")
                (js "less")]
               [:body
-               [:ul#concept-list]
+               [:ul#concept-list.icon]
                [:ul#instance-list]
                [:div#editor]
                ;[:div (ajax-link "add-instance-link" "Add")]
@@ -63,15 +65,14 @@
                            [:div.header 
                             [:span.name (js-var "url")] ":Page"]
                            [:ul
-                            [:li
-                             [:label "URL: "][:input.url]]
-                            [:li
-                             [:label "Styles: "][:ul.styles]
-                             [:a.add-style-link {:href "#"} "Add"]]
-                            [:li
-                             [:label "Layout: "][:select.layout]]
-                            [:li
-                             [:label "Body "][:textarea.body]]])
+                            [:li.field
+                             [:label "URL:"][:input.url]]
+                            [:li.field
+                             [:label "Styles:"][:select.style-selector {:multiple true :data-placeholder "Add styles..."} ""]]
+                            [:li.field
+                             [:label "Layout:"][:select.layout "&nbsp;"]]
+                            [:li.field
+                             [:label "Body:"][:textarea.body]]])
               (js-template "layouts-editor"
                            [:ul
                             [:li "Name: " [:input.name]]

@@ -8,6 +8,8 @@
 @concept-list-padding: 12px;
 @instance-list-width: 150px;
 @instance-list-padding: 12px;
+
+//this sucks, remove
 @h: `$.trim( $(window).height() ) + 'px'`;
 @window-height: 0px + @h;
 
@@ -19,8 +21,25 @@ body {
     border-right: 1px solid @dark-color;
 }
 
+.border-bottom {
+    border-bottom: 1px solid @dark-color;
+}
+
 .full-height {
     //height: @window-height;
+}
+
+.icon {
+    font-family: Batch;
+}
+
+a {
+    text-decoration: none;
+    color: @dark-color;
+}
+
+a:hover {
+    color: lighten(@dark-color, 30%);
 }
 
 #concept-list {
@@ -30,9 +49,9 @@ body {
     float: left;
     .full-height;
     .border-right;
+    .border-bottom;
 
     li {
-        font-family: Batch;
         cursor: pointer;
         font-size: 30px;
         padding: @concept-list-padding;
@@ -54,7 +73,6 @@ body {
     float: left;
     .full-height;
     padding: @instance-list-padding;
-    .border-right;
 
     li {
         background: #E3E3E3;
@@ -90,8 +108,37 @@ body {
         }
     }
 
-    li {
+    li.field {
         padding: 12px;
+        border-bottom: 1px solid @dark-color;
+        border-left: 1px solid @dark-color;
+        border-right: 1px solid @dark-color;
+
+        label {
+            font-weight: bold;
+            margin-right: 12px;
+        }
+    }
+
+    input {
+        border: 1px solid #ccc;
+        border-radius: 5px 5px 5px 5px;
+        font-family: monospace;
+        font-size: 16px;
+        padding: 6px; 
+    }
+
+    input:focus {
+        border-color: @dark-color;
+        box-shadow: 0 1px 3px #aaa;
+    }
+
+    .add-style-link {
+        font-size: 22px;
+    }
+
+    .style-selector {
+        width: 80%;
     }
 }
 

@@ -343,7 +343,17 @@ $(function() {
             var body = root.find('.body');
             body.val(values.body);
             
-            style_binding(root, values);
+            var style_selector = $(".style-selector");
+
+            S.Concepts.find(function(c){
+                return c.get('name') == 'styles';
+            }).get('instances').each(function(i){
+                var name = i.get('values')['name'];
+                var option = $("<option>").attr('value', name).html(name);
+                style_selector.append(option);
+            });
+
+            style_selector.chosen();
 
             //Layouts
             var layout_select = root.find('.layout');
@@ -362,10 +372,10 @@ $(function() {
             });
 
             //FIXME: Setting attributes on 'this' probably isn't great...
-            this.cm = CodeMirror.fromTextArea(body.get(0), {
-                mode: 'xml',
-                lineNumbers: true
-            });
+            //this.cm = CodeMirror.fromTextArea(body.get(0), {
+                //mode: 'xml',
+                //lineNumbers: true
+            //});
         },
         save: function(root) {
             return {
