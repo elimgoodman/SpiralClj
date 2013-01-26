@@ -8,6 +8,8 @@
 @concept-list-padding: 12px;
 @instance-list-width: 150px;
 @instance-list-padding: 12px;
+@h: `$.trim( $(window).height() ) + 'px'`;
+@window-height: 0px + @h;
 
 body {
     font-family: Helvetica Neue;
@@ -17,12 +19,16 @@ body {
     border-right: 1px solid @dark-color;
 }
 
+.full-height {
+    height: @window-height;
+}
+
 #concept-list {
     width: @concept-list-width;
     left: 0;
     top: 0;
-    position: fixed;
-    height: 100%;
+    float: left;
+    .full-height;
     .border-right;
 
     li {
@@ -45,8 +51,8 @@ body {
     width: @instance-list-width;
     left: @concept-list-width;
     top: 0;
-    position: fixed;
-    height: 100%;
+    float: left;
+    .full-height;
     padding: @instance-list-padding;
     .border-right;
 
@@ -69,11 +75,9 @@ body {
 }
 
 #editor {
-    position: absolute;
-    left: (@concept-list-width 
-        + @instance-list-width
-        + @concept-list-padding
-        + @instance-list-padding);
     padding: 12px;
+    overflow: hidden;
+    width: auto;
+    .full-height;
 }
 
