@@ -20,7 +20,7 @@ body {
 }
 
 .full-height {
-    height: @window-height;
+    //height: @window-height;
 }
 
 #concept-list {
@@ -75,9 +75,23 @@ body {
 }
 
 #editor {
-    padding: 12px;
     overflow: hidden;
     width: auto;
     .full-height;
+
+    .header {
+        padding: 12px;
+        background: black;
+        color: white;
+        font-size: 18px;
+
+        .name {
+            font-weight: bold;
+        }
+    }
+
+    li {
+        padding: 12px;
+    }
 }
 

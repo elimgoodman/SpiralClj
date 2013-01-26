@@ -60,6 +60,8 @@
               (js-template "instance-list-tmpl" (js-var "display_name"))
               (js-template "style-selector-tmpl" [:select.style])
               (js-template "pages-editor"
+                           [:div.header 
+                            [:span.name (js-var "url")] ":Page"]
                            [:ul
                             [:li
                              [:label "URL: "][:input.url]]
