@@ -1,0 +1,79 @@
+@font-face {
+  font-family: 'Batch';
+  src: url(../fonts/batch-icons-webfont.woff) format('woff');
+}
+
+@dark-color: #131313;
+@concept-list-width: 64px;
+@concept-list-padding: 12px;
+@instance-list-width: 150px;
+@instance-list-padding: 12px;
+
+body {
+    font-family: Helvetica Neue;
+}
+
+.border-right {
+    border-right: 1px solid @dark-color;
+}
+
+#concept-list {
+    width: @concept-list-width;
+    left: 0;
+    top: 0;
+    position: fixed;
+    height: 100%;
+    .border-right;
+
+    li {
+        font-family: Batch;
+        cursor: pointer;
+        font-size: 30px;
+        padding: @concept-list-padding;
+        background: white;
+        color: @dark-color;
+    }
+
+    li.selected {
+        color: white;
+        background: @dark-color;
+        font-weight: normal;
+    }
+}
+
+#instance-list {
+    width: @instance-list-width;
+    left: @concept-list-width;
+    top: 0;
+    position: fixed;
+    height: 100%;
+    padding: @instance-list-padding;
+    .border-right;
+
+    li {
+        background: #E3E3E3;
+        border-radius: 18px;
+        color: black;
+        font-weight: bold;
+        padding: 9px 16px;
+        cursor: pointer;
+        margin-bottom: 9px;
+        border: 1px solid #ccc;
+    }
+
+    li.selected {
+        background: @dark-color;
+        border: 1px solid white;
+        color: white;
+    }
+}
+
+#editor {
+    position: absolute;
+    left: (@concept-list-width 
+        + @instance-list-width
+        + @concept-list-padding
+        + @instance-list-padding);
+    padding: 12px;
+}
+

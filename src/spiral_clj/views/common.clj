@@ -28,6 +28,9 @@
 (defn js-var [variable]
   (str "<%= " variable " %>"))
 
+(defn less [filename]
+  [:link {:rel "stylesheet/less" :type "text/css" :href filename}])
+
 (defpage "/" []
          (html5
               [:head
@@ -39,19 +42,22 @@
                (js "mode/xml")
                (js "mode/css")
                (js "index")
+               (include-css "/css/reset.css")
                (include-css "/css/codemirror.css")
-               (include-css "/css/index.css")]
+               (less "/css/index.less")
+               (js "less")]
               [:body
                [:ul#concept-list]
                [:ul#instance-list]
                [:div#editor]
-               [:div (ajax-link "add-instance-link" "Add")]
-               [:div (ajax-link "save-link" "Save")]
+               ;[:div (ajax-link "add-instance-link" "Add")]
+               ;[:div (ajax-link "save-link" "Save")]
                ;[:div (ajax-link "run-link" "Run")]
                ;[:div (ajax-link "stop-link" "Stop")]
               ]
-              (js-template "concept-list-tmpl" (js-var "display_name"))
-              (js-template "instance-list-tmpl" "inst")
+              (js-template "concept-list-tmpl" 
+                           (str "&#x" (js-var "icon_code") ";"))
+              (js-template "instance-list-tmpl" (js-var "display_name"))
               (js-template "style-selector-tmpl" [:select.style])
               (js-template "pages-editor"
                            [:ul

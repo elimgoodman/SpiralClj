@@ -1,3 +1,36 @@
+@font-face {
+  font-family: 'Batch';
+  src: url(../fonts/batch-icons-webfont.woff) format('woff');
+}
+.concept {
+  font-family: Batch;
+  cursor: pointer;
+  font-size: 30px;
+  padding: 12px;
+}
 .selected {
-    font-weight: bold;
+  font-weight: bold;
+}
+.concept.selected {
+  color: white;
+  background: black;
+  font-weight: normal;
+}
+#concept-list {
+  width: 64px;
+  left: 0;
+  top: 0;
+  position: fixed;
+  height: 100%;
+}
+#instance-list {
+  width: 200px;
+  left: 200px;
+  top: 0;
+  position: fixed;
+  height: 100%;
+}
+#editor {
+  position: absolute;
+  left: 400px;
 }

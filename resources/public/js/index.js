@@ -141,6 +141,17 @@ $(function() {
         },
         selectInstance: function() {
             S.CurrentInstance.set(this.model);
+        },
+        getTemplateContext: function() {
+            var concept = this.model.get('parent');
+            var id_field = concept.get('id_field');
+            var values = this.model.get('values');
+            
+            var display_name = values[id_field];
+
+            return _.extend(this.model.toJSON(), {
+                display_name: display_name
+            });
         }
     });
 
@@ -321,6 +332,7 @@ $(function() {
     var pages = new S.Concept({
         name: 'pages',
         display_name: 'Pages',
+        icon_code: 'f035',
         id_field: 'url',
         fields: ['url', 'body', 'styles', 'layout'],
         editor_js: ["/js/codemirror.js", "/js/mode/xml.js"],
@@ -370,6 +382,7 @@ $(function() {
     var layouts = new S.Concept({
         name: 'layouts',
         display_name: 'Layouts',
+        icon_code: "f121",
         id_field: 'name',
         fields: ['name', 'styles', 'body'],
         editor_js: ["/js/codemirror.js", "/js/mode/xml.js"],
@@ -402,6 +415,7 @@ $(function() {
     var styles = new S.Concept({
         name: 'styles',
         display_name: 'Styles',
+        icon_code: 'f040',
         id_field: 'name',
         fields: ['name', 'body'],
         load: function(root, values) {
@@ -426,7 +440,7 @@ $(function() {
     var partials = new S.Concept({
         name: 'partials',
         display_name: 'Partials',
-
+        icon_code: "f0d6",
         id_field: 'name',
         fields: ['name', 'body', 'styles'],
         load: function(root, values) {
