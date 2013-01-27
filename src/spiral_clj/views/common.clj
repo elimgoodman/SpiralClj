@@ -66,7 +66,7 @@
                             [:span.name (js-var "url")] ":Page"]
                            [:ul
                             [:li.field
-                             [:label "URL:"][:input.url]]
+                             [:label "URL:"][:input.field-input.url]]
                             [:li.field
                              [:label "Styles:"][:select.style-selector {:multiple true :data-placeholder "Add styles..."} ""]]
                             [:li.field

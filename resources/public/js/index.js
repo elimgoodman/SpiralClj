@@ -349,7 +349,8 @@ $(function() {
                 return c.get('name') == 'styles';
             }).get('instances').each(function(i){
                 var name = i.get('values')['name'];
-                var option = $("<option>").attr('value', name).html(name);
+                var txt = "<span class='icon style-icon'>&#xf040;</span>" + name;
+                var option = $("<option>").attr('value', name).html(txt);
                 style_selector.append(option);
             });
 
@@ -370,12 +371,14 @@ $(function() {
 
                 layout_select.append(option);
             });
+            
+            layout_select.chosen();
 
             //FIXME: Setting attributes on 'this' probably isn't great...
-            //this.cm = CodeMirror.fromTextArea(body.get(0), {
-                //mode: 'xml',
-                //lineNumbers: true
-            //});
+            this.cm = CodeMirror.fromTextArea(body.get(0), {
+                mode: 'xml',
+                lineNumbers: true
+            });
         },
         save: function(root) {
             return {
