@@ -46,6 +46,7 @@
                (include-css "/css/reset.css")
                (include-css "/css/chosen.css")
                (include-css "/css/codemirror.css")
+               (include-css "/css/cm-blackboard.css")
                (less "/css/index.less")
                (js "less")]
               [:body
@@ -63,7 +64,7 @@
               (js-template "style-selector-tmpl" [:select.style])
               (js-template "pages-editor"
                            [:div.header 
-                            [:span.name (js-var "url")] ":Page"]
+                            [:span.icon "&#xf035;"] [:span.name (js-var "url")] ":Page"]
                            [:ul
                             [:li.field
                              [:label "URL:"][:input.field-input.url]]
@@ -71,8 +72,8 @@
                              [:label "Styles:"][:select.style-selector {:multiple true :data-placeholder "Add styles..."} ""]]
                             [:li.field
                              [:label "Layout:"][:select.layout "&nbsp;"]]
-                            [:li.field
-                             [:label "Body:"][:textarea.body]]])
+                            [:li.field.body-field
+                             [:div.label-container [:label "Body:"]][:textarea.body]]])
               (js-template "layouts-editor"
                            [:ul
                             [:li "Name: " [:input.name]]

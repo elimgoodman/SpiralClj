@@ -349,8 +349,10 @@ $(function() {
                 return c.get('name') == 'styles';
             }).get('instances').each(function(i){
                 var name = i.get('values')['name'];
-                var txt = "<span class='icon style-icon'>&#xf040;</span>" + name;
-                var option = $("<option>").attr('value', name).html(txt);
+                var icon = "<span class='icon style-icon'>&#xf040;</span>";
+                var name = "<span class='style-name'>" + name + "</span>";
+                var type = ":Style";
+                var option = $("<option>").attr('value', name).html(icon + name + type);
                 style_selector.append(option);
             });
 
