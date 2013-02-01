@@ -42,7 +42,9 @@
                (js "mode/xml")
                (js "mode/css")
                (js "chosen")
-               (js "index")
+               (js "marionette")
+               ;(js "index")
+               (js "index_marionette")
                (include-css "/css/reset.css")
                (include-css "/css/chosen.css")
                (include-css "/css/codemirror.css")
@@ -50,8 +52,7 @@
                (less "/css/index.less")
                (js "less")]
               [:body
-               [:ul#concept-list.icon]
-               [:ul#instance-list]
+               [:ul#concept-list]
                [:div#editor]
                ;[:div (ajax-link "add-instance-link" "Add")]
                ;[:div (ajax-link "save-link" "Save")]
