@@ -1,32 +1,6 @@
 $(function() {
     var S = window.S || {};
     
-    S.SelectionKeeper = function () {
-        this.selected = null;
-        this.prechange = null;
-    };
-    _.extend(S.SelectionKeeper.prototype, Backbone.Events, {
-        set: function (selected) {
-            if(this.selected && this.prechange) {
-                this.prechange();
-            }
-
-            if(this.selected) {
-                this.selected.set({
-                    selected: false
-                });
-            }
-            this.selected = selected;
-            this.selected.set({
-                selected: true
-            });
-            this.trigger('change');
-        },
-        get: function () {
-            return this.selected;
-        }
-    });
-
     S.CurrentConcept = new S.SelectionKeeper();
     S.CurrentInstance = new S.SelectionKeeper();
     
@@ -170,21 +144,7 @@ $(function() {
             'click': 'save'
         },
         save: function(e) {
-            if(S.CurrentInstance.get()) {
-                S.TheEditor.save();
-            }
 
-            var data = {};
-
-            S.Concepts.each(function(c){
-                data[c.get('name')] = c.get('instances').map(function(i){
-                    return i.get('values');
-                });
-            });
-
-            $.post("/save", {instances: data});
-
-            e.preventDefault();
         }
     });
 

@@ -31,6 +31,9 @@
 (defn less [filename]
   [:link {:rel "stylesheet/less" :type "text/css" :href filename}])
 
+(defn icon [code]
+  (str "&#x" code ";"))
+
 (defpage "/" []
          (html5
               [:head
@@ -54,7 +57,10 @@
                (less "/css/index_marionette.less")
                (js "less")]
               [:body
-               [:ul#concept-list]
+               [:div#sidebar
+                [:ul#concept-list]
+                [:div#action-links
+                 (ajax-link "save-link" "Save")]]
                [:div#editor]
                ;[:div (ajax-link "add-instance-link" "Add")]
                ;[:div (ajax-link "save-link" "Save")]
@@ -62,9 +68,14 @@
                ;[:div (ajax-link "stop-link" "Stop")]
               ]
               (js-template "concept-list-tmpl" 
-                           [:div.header (js-var "display_name")
-                            [:ul.instances]])
-              (js-template "instance-list-tmpl" (js-var "name"))
+                           [:div.header 
+                            (js-var "display_name")
+                            [:a {:href "#" :class "add-instance-link icon"} (icon "F14c")]]
+                           [:div.instances]
+                           [:div.new-instance-form])
+              (js-template "instance-list-tmpl" 
+                           [:span.name (js-var "name")]
+                           [:a {:href "#" :class "delete-link"} "Delete"])
               (js-template "instance-editor-tmpl"
                            [:div.header (js-var "name")
                             [:a {:href "#" :class "toggle-fields"} "Toggle"]]
@@ -85,6 +96,7 @@
                              [:label "Styles: "][:ul.styles]
                              [:a.add-style-link {:href "#"} "Add"]]])
               (js-template "styles-editor" "&nbsp;")
+              (js-template "new-instance-form" [:input.name])
               (js-template "partials-editor"
                            [:ul
                             [:li

@@ -1,7 +1,3 @@
-@font-face {
-  font-family: 'Batch';
-  src: url(../fonts/batch-icons-webfont.woff) format('woff');
-}
 
 @dark-color: #131313;
 @concept-list-width: 64px;
@@ -13,9 +9,6 @@
 @h: `$.trim( $(window).height() ) + 'px'`;
 @window-height: 0px + @h;
 
-body {
-    font-family: Helvetica Neue;
-}
 
 .border-right {
     border-right: 1px solid @dark-color;
@@ -29,18 +22,7 @@ body {
     //height: @window-height;
 }
 
-.icon {
-    font-family: Batch;
-}
 
-a {
-    text-decoration: none;
-    color: @dark-color;
-}
-
-a:hover {
-    color: lighten(@dark-color, 30%);
-}
 
 #concept-list {
     width: @concept-list-width;

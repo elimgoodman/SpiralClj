@@ -1,12 +1,41 @@
+@font-face {
+  font-family: 'Batch';
+  src: url(../fonts/batch-icons-webfont.woff) format('woff');
+}
+
+@dark-color: #131313;
+
+body {
+    font-family: Helvetica Neue;
+}
+
+.icon {
+    font-family: Batch;
+}
+
+a {
+    text-decoration: none;
+    color: @dark-color;
+}
+
+a:hover {
+    color: lighten(@dark-color, 30%);
+}
+
 @concept-width: 200px;
 
-#concept-list {
+#sidebar {
     width: @concept-width;
     height: 100%;
     top: 0;
     left: 0;
     position: fixed;
     border-right: 1px solid black;
+}
+
+#action-links {
+    position: absolute;
+    bottom: 0;
 }
 
 #editor {
