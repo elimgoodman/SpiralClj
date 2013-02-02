@@ -1,34 +1,36 @@
 App.module('Concepts', function(Concepts, App, Backbone, Marionette, $, _) {
+    
+    var style_binding = function(root) {
+        var style_selector = root.find(".style-selector");
+
+        Concepts.Concepts.find(function(c){
+            return c.get('name') == 'styles';
+        }).get('instances').each(function(i){
+            var name = i.get('values')['name'];
+            var icon = "<span class='icon style-icon'>&#xf040;</span>";
+            var name = "<span class='style-name'>" + name + "</span>";
+            var type = ":Style";
+            var option = $("<option>").attr('value', name).html(icon + name + type);
+            style_selector.append(option);
+        });
+
+        style_selector.chosen();
+    }
 
     var pages = new App.Models.Concept({
         name: 'pages',
         display_name: 'Pages',
+        display_name_singular: 'Page',
         mode: 'xml',
         icon_code: 'f035',
         id_field: 'url',
-        fields: ['url', 'body', 'styles', 'layout'],
+        fields: ['url', 'styles', 'layout'],
         editor_js: ["/js/codemirror.js", "/js/mode/xml.js"],
         editor_css: ["/css/codemirror.css"],
         load: function(root, values) {
             root.find('.url').val(values.url);
-
-            var body = root.find('.body');
-            body.val(values.body);
             
-            var style_selector = $(".style-selector");
-
-            Concepts.Concepts.find(function(c){
-                return c.get('name') == 'styles';
-            }).get('instances').each(function(i){
-                var name = i.get('values')['name'];
-                var icon = "<span class='icon style-icon'>&#xf040;</span>";
-                var name = "<span class='style-name'>" + name + "</span>";
-                var type = ":Style";
-                var option = $("<option>").attr('value', name).html(icon + name + type);
-                style_selector.append(option);
-            });
-
-            style_selector.chosen();
+            style_binding(root, values);
 
             //Layouts
             var layout_select = root.find('.layout');
@@ -46,7 +48,7 @@ App.module('Concepts', function(Concepts, App, Backbone, Marionette, $, _) {
                 layout_select.append(option);
             });
             
-            //layout_select.chosen();
+            layout_select.chosen();
         },
         save: function(root) {
             return {
@@ -62,29 +64,18 @@ App.module('Concepts', function(Concepts, App, Backbone, Marionette, $, _) {
     var layouts = new App.Models.Concept({
         name: 'layouts',
         display_name: 'Layouts',
+        display_name_singular: 'Layout',
         icon_code: "f121",
         id_field: 'name',
-        fields: ['name', 'styles', 'body'],
+        fields: ['styles'],
         editor_js: ["/js/codemirror.js", "/js/mode/xml.js"],
         editor_css: ["/css/codemirror.css"],
+        mode: 'xml',
         load: function(root, values) {
-
-            //style_binding(root, values);
-
-            root.find('.name').val(values.name);
-
-            var body = root.find('.body');
-            body.val(values.body);
-
-            this.cm = CodeMirror.fromTextArea(body.get(0), {
-                mode: 'xml',
-                lineNumbers: true
-            });
+            style_binding(root, values);
         },
         save: function(root) {
             return {
-                name: root.find('.name').val(),
-                body: this.cm.getValue(),
                 styles: _.map(root.find('.style'), function(s){
                     return $(s).val();
                 })
@@ -95,51 +86,26 @@ App.module('Concepts', function(Concepts, App, Backbone, Marionette, $, _) {
     var styles = new App.Models.Concept({
         name: 'styles',
         display_name: 'Styles',
+        display_name_singular: 'Style',
         icon_code: 'f040',
         id_field: 'name',
-        fields: ['name', 'body'],
-        load: function(root, values) {
-            root.find('.name').val(values.name);
-
-            var body = root.find('.body');
-            body.val(values.body);
-
-            this.cm = CodeMirror.fromTextArea(body.get(0), {
-                mode: 'css',
-                lineNumbers: true
-            });
-        },
-        save: function(root) {
-            return {
-                name: root.find('.name').val(),
-                body: this.cm.getValue(),
-            };
-        },
+        fields: [],
+        mode: 'css'
     });
     
     var partials = new App.Models.Concept({
         name: 'partials',
         display_name: 'Partials',
+        display_name_singular: 'Partial',
         icon_code: "f0d6",
         id_field: 'name',
-        fields: ['name', 'body', 'styles'],
+        fields: ['styles'],
+        mode: 'xml',
         load: function(root, values) {
-            //style_binding(root, values);
-
-            root.find('.name').val(values.name);
-
-            var body = root.find('.body');
-            body.val(values.body);
-
-            this.cm = CodeMirror.fromTextArea(body.get(0), {
-                mode: 'xml',
-                lineNumbers: true
-            });
+            style_binding(root, values);
         },
         save: function(root) {
             return {
-                name: root.find('.name').val(),
-                body: this.cm.getValue(),
                 styles: _.map(root.find('.style'), function(s){
                     return $(s).val();
                 })

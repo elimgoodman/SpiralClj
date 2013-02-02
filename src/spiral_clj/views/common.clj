@@ -60,7 +60,7 @@
                [:div#sidebar
                 [:ul#concept-list]
                 [:div#action-links
-                 (ajax-link "save-link" "Save")]]
+                 [:div.action-link (ajax-link "save-link" (icon "F059"))]]]
                [:div#editor]
                ;[:div (ajax-link "add-instance-link" "Add")]
                ;[:div (ajax-link "save-link" "Save")]
@@ -69,16 +69,23 @@
               ]
               (js-template "concept-list-tmpl" 
                            [:div.header 
-                            (js-var "display_name")
+                            [:span.name (js-var "display_name")]
                             [:a {:href "#" :class "add-instance-link icon"} (icon "F14c")]]
                            [:div.instances]
                            [:div.new-instance-form])
               (js-template "instance-list-tmpl" 
-                           [:span.name (js-var "name")]
+                           [:span 
+                            [:span.icon.parent-icon (icon (js-var "getParentIcon()"))]
+                            [:a.name {:href "#"} (js-var "name")] ":" (js-var "getParentDisplayName()")]
                            [:a {:href "#" :class "delete-link"} "Delete"])
               (js-template "instance-editor-tmpl"
-                           [:div.header (js-var "name")
-                            [:a {:href "#" :class "toggle-fields"} "Toggle"]]
+                           [:div.header 
+                            [:span.icon.parent-icon (icon (js-var "getParentIcon()"))]
+                            [:span [:span.name (js-var "name")] ":" (js-var "getParentDisplayName()")]
+                            "<% if (parentHasFields()) { %>"
+                              [:a {:href "#" :class "toggle-fields icon"} (icon "F01D")]
+                             "<% } %>"
+                            ]
                            [:div.fields (js-var "getFields()")]
                            [:textarea.body (js-var "body")])
               (js-template "style-selector-tmpl" [:select.style])
@@ -92,12 +99,11 @@
                              [:label "Layout:"][:select.layout "&nbsp;"]]])
               (js-template "layouts-editor"
                            [:ul
-                            [:li
-                             [:label "Styles: "][:ul.styles]
-                             [:a.add-style-link {:href "#"} "Add"]]])
+                            [:li.field
+                             [:label "Styles:"][:select.style-selector {:multiple true :data-placeholder "Add styles..."} ""]]])
               (js-template "styles-editor" "&nbsp;")
               (js-template "new-instance-form" [:input.name])
               (js-template "partials-editor"
                            [:ul
-                            [:li
-                             [:label "Styles: "][:ul.styles]]])))
+                            [:li.field
+                             [:label "Styles:"][:select.style-selector {:multiple true :data-placeholder "Add styles..."} ""]]])))

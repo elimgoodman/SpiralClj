@@ -5,6 +5,20 @@ App.addRegions({
     editor: "#editor"
 });
 
+App.module('Util', function(Util, App, Backbone, Marionette, $, _) {
+    Util.instanceHelpers = {
+        getParentDisplayName: function() {
+            return this.parent.get('display_name_singular');
+        },
+        getParentIcon: function() {
+            return this.parent.get('icon_code');
+        },
+        parentHasFields: function() {
+            return this.parent.get('fields').length > 0;
+        }
+    }
+});
+
 App.module('Models', function(Models, App, Backbone, Marionette, $, _) {
 
     Models.Instance = Backbone.Model.extend({
@@ -32,7 +46,9 @@ App.module('Models', function(Models, App, Backbone, Marionette, $, _) {
         defaults: {
             editor_js: [],
             editor_css: [],
-            css_rules: {}
+            css_rules: {},
+            load: $.noop,
+            save: $.noop
         },
         initialize: function() {
             if(this.get('instances') == undefined) {
@@ -74,6 +90,8 @@ App.module('Sidebar', function(Sidebar, App, Backbone, Marionette, $, _) {
             this.instances.show(new Sidebar.InstanceListView({
                 collection: this.model.get('instances')
             }));
+
+            this.$el.addClass(this.model.get('name'));
         },
         events: {
             'click .add-instance-link': 'addInstance'
@@ -121,7 +139,7 @@ App.module('Sidebar', function(Sidebar, App, Backbone, Marionette, $, _) {
         itemView: Sidebar.ConceptView,
         tagName: 'ul'
     });
-
+    
     Sidebar.InstanceView = Backbone.Marionette.ItemView.extend({
         template: "#instance-list-tmpl",
         tagName: 'div',
@@ -135,7 +153,8 @@ App.module('Sidebar', function(Sidebar, App, Backbone, Marionette, $, _) {
         },
         deleteInstance: function() {
             this.model.destroy();
-        }
+        },
+        templateHelpers: App.Util.instanceHelpers
     });
 
     Sidebar.InstanceListView = Backbone.Marionette.CollectionView.extend({
@@ -148,9 +167,9 @@ App.module('Sidebar', function(Sidebar, App, Backbone, Marionette, $, _) {
             'click #save-link': 'save'
         },
         save: function(e) {
-            //if(S.CurrentInstance.get()) {
-                //S.TheEditor.save();
-            //}
+            if(App.Selections.Instance.get()) {
+                App.Editor.save();
+            }
 
             var data = {};
 
@@ -198,35 +217,24 @@ App.module('Selections', function(Selections, App, Backbone, Marionette, $, _) {
 });
 
 App.module('Editor', function(Editor, App, Backbone, Marionette, $, _) {
+    
     Editor.InstanceView = Backbone.Marionette.ItemView.extend({
         template: "#instance-editor-tmpl",
         ui: {
             fields: ".fields",
             body: ".body"
         },
-        templateHelpers: {
+        templateHelpers: _.extend(App.Util.instanceHelpers, {
             getFields: function() {
                 var concept = this.parent;
                 return concept.field_tmpl(this.values);
             }
-        },
+        }),
         events: {
             'click .toggle-fields': 'toggleFields'
         },
         toggleFields: function() {
-            this.ui.fields.toggle();
-        },
-        onRender: function() {
-            var concept = this.model.get('parent');
-            concept.get('load')(this.$el, this.model.get('values'));
-
-            this.body_cm = CodeMirror.fromTextArea(this.ui.body.get(0), {
-                mode: concept.get('mode'),
-                lineNumbers: true
-            });
-
-            var self = this;
-            setTimeout(function(){self.body_cm.refresh();}, 20);
+            this.ui.fields.slideToggle(100);
         }
     });
 
@@ -241,6 +249,40 @@ App.module('Editor', function(Editor, App, Backbone, Marionette, $, _) {
             App.editor.show(v);
         }
     });
+
+    Editor.resizeEditor = function() {
+        var sidebar_width = $("#sidebar").outerWidth();
+        var window_width = $(window).width();
+        
+        $("#editor").css({
+            width: (window_width - sidebar_width) + "px"
+        });
+    }
+
+    App.editor.on('show', function(view) {
+        var instance = App.Selections.Instance.get();
+        var concept = instance.get('parent');
+        concept.get('load')(view.$el, instance.get('values'));
+        
+        var body = view.$('.body');
+        body.val(instance.get('body'));
+
+        view.body_cm = CodeMirror.fromTextArea(body.get(0), {
+            mode: concept.get('mode'),
+            lineNumbers: true
+        });
+    });
+
+    App.Editor.save = function() {
+        var instance = App.Selections.Instance.get();
+        var concept = instance.get('parent');
+        var values = concept.get('save')(App.editor.$el);
+
+        instance.set({
+            values: values,
+            body: App.editor.currentView.body_cm.getValue()
+        });
+    }
 });
 
 App.addInitializer(function(options){
@@ -253,7 +295,8 @@ App.addInitializer(function(options){
     var v = new App.Sidebar.ConceptListView({
         collection: App.Concepts.Concepts
     });
-    
+
+    App.Editor.resizeEditor();
     App.concept_list.show(v);
 });
 

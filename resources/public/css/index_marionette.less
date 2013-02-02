@@ -4,12 +4,14 @@
 }
 
 @dark-color: #131313;
+@sidebar-border-width: 1px;
 
 body {
     font-family: Helvetica Neue;
+    font-weight: 200;
 }
 
-.icon {
+.icon, .action-link {
     font-family: Batch;
 }
 
@@ -24,13 +26,96 @@ a:hover {
 
 @concept-width: 200px;
 
+@pages-color: #8C2318;
+@layouts-color: #5E8C6A;
+@styles-color: #BFB35A;
+@partials-color: #88A65E;
+
 #sidebar {
     width: @concept-width;
     height: 100%;
     top: 0;
     left: 0;
     position: fixed;
-    border-right: 1px solid black;
+    border-right: @sidebar-border-width solid black;
+
+    li.concept {
+        .header {
+            padding: 6px;
+            
+            border-top: 1px solid @dark-color;
+            border-bottom: 1px solid @dark-color;
+
+            .name {
+                font-weight: bold;
+                color: white;
+                text-shadow: 0 1px 1px #333;
+            }
+
+            .add-instance-link {
+                float: right;
+            }
+        }
+        
+        .instances {
+            padding: 6px;
+        }
+
+        .instance {
+            
+            margin: 6px 0;
+            
+            .name {
+                font-weight: bold;
+            }
+
+            .delete-link {
+                display: none;
+            }
+
+            .parent-icon {
+                margin-right: 6px;
+            }
+        }
+    }
+
+    li.concept.pages {
+        .header {
+            background: @pages-color;
+        }
+
+        .parent-icon {
+            color: @pages-color;
+        }
+    }
+
+    li.concept.layouts {
+        .header {
+            background: @layouts-color;
+        }
+        .parent-icon {
+            color: @layouts-color;
+        }
+    }
+
+    li.concept.styles { 
+        .header {
+            background: @styles-color;
+        }
+
+        .parent-icon {
+            color: @styles-color;
+        }
+    }
+
+    li.concept.partials {
+        .header {
+            background: @partials-color;
+        }
+        .parent-icon {
+            color: @partials-color;
+        }
+    }
 }
 
 #action-links {
@@ -40,11 +125,116 @@ a:hover {
 
 #editor {
     overflow: hidden;
-    width: 100%;
-    left: @concept-width;
+    left: (@concept-width + @sidebar-border-width);
     position: fixed;
+    height: 100%;
+
+    .header {
+        background: @dark-color;
+        padding: 12px;
+        color: white;
+        font-size: 22px;
+
+        .name {
+            font-weight: bold;
+            margin-left: 12px;
+        }
+
+        .toggle-fields {
+            float: right;
+            color: white;
+        }
+
+        .toggle-fields:hover {
+            color: #aaa;
+        }
+    }
 
     .fields {
+        background: none repeat scroll 0 0 white;
+        position: absolute;
+        width: 100%;
+        z-index: 1000;
         display: none;
+    }
+
+    li.field {
+        padding: 12px;
+        border-bottom: 1px solid @dark-color;
+        border-left: 1px solid @dark-color;
+        border-right: 1px solid @dark-color;
+
+        label {
+            font-weight: bold;
+            padding-right: 12px;
+        }
+    }
+
+    li.field.body-field {
+        padding: 0;
+
+        .label-container {
+            padding: 12px;
+        }
+    }
+
+    input.field-input {
+        border: 1px solid #ccc;
+        font-family: monospace;
+        font-size: 16px;
+        padding: 6px; 
+    }
+
+    input.field-input:focus {
+        border-color: @dark-color;
+        box-shadow: 0 1px 3px #aaa;
+    }
+
+    .add-style-link {
+        font-size: 22px;
+    }
+    
+    .style-icon {
+        margin-right: 6px;
+    }
+
+    .style-selector {
+        width: 400px;
+    }
+
+    .style-name {
+        font-weight: bold;
+    }
+
+    .layout {
+        width: 150px;
+    }
+}
+
+#action-links {
+    border-top: 1px solid @dark-color;
+    width: 100%;
+    font-size: 30px;
+
+    .action-link {
+        padding: 6px;
+        border-right: 1px solid @dark-color;
+        float: left;
+
+        a {
+            color: @dark-color;
+        }
+    }
+
+    .action-link:hover {
+        background: @dark-color;
+
+        a {
+            color: white;
+        }
+
+        a:hover {
+            color: #aaa;
+        }
     }
 }
