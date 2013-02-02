@@ -72,31 +72,20 @@
                            [:textarea.body (js-var "body")])
               (js-template "style-selector-tmpl" [:select.style])
               (js-template "pages-editor"
-                           [:div.header 
-                            [:span.icon "&#xf035;"] [:span.name (js-var "url")] ":Page"]
                            [:ul
                             [:li.field
                              [:label "URL:"][:input.field-input.url]]
                             [:li.field
                              [:label "Styles:"][:select.style-selector {:multiple true :data-placeholder "Add styles..."} ""]]
                             [:li.field
-                             [:label "Layout:"][:select.layout "&nbsp;"]]
-                            [:li.field.body-field
-                             [:div.label-container [:label "Body:"]][:textarea.body]]])
+                             [:label "Layout:"][:select.layout "&nbsp;"]]])
               (js-template "layouts-editor"
                            [:ul
-                            [:li "Name: " [:input.name]]
                             [:li
                              [:label "Styles: "][:ul.styles]
-                             [:a.add-style-link {:href "#"} "Add"]]
-                            [:li "Body: " [:textarea.body]]])
-              (js-template "styles-editor"
-                           [:ul
-                            [:li "Name: " [:input.name]]
-                            [:li "Body: " [:textarea.body]]])
+                             [:a.add-style-link {:href "#"} "Add"]]])
+              (js-template "styles-editor" "&nbsp;")
               (js-template "partials-editor"
                            [:ul
-                            [:li "Name: " [:input.name]]
                             [:li
-                             [:label "Styles: "][:ul.styles]]
-                            [:li "Body: " [:textarea.body]]])))
+                             [:label "Styles: "][:ul.styles]]])))

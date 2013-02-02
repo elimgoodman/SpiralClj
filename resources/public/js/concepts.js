@@ -3,6 +3,7 @@ App.module('Concepts', function(Concepts, App, Backbone, Marionette, $, _) {
     var pages = new App.Models.Concept({
         name: 'pages',
         display_name: 'Pages',
+        mode: 'xml',
         icon_code: 'f035',
         id_field: 'url',
         fields: ['url', 'body', 'styles', 'layout'],
@@ -45,18 +46,11 @@ App.module('Concepts', function(Concepts, App, Backbone, Marionette, $, _) {
                 layout_select.append(option);
             });
             
-            layout_select.chosen();
-
-            //FIXME: Setting attributes on 'this' probably isn't great...
-            this.cm = CodeMirror.fromTextArea(body.get(0), {
-                mode: 'xml',
-                lineNumbers: true
-            });
+            //layout_select.chosen();
         },
         save: function(root) {
             return {
                 url: root.find('.url').val(),
-                body: this.cm.getValue(),
                 styles: _.map(root.find('.style'), function(s){
                     return $(s).val();
                 }),

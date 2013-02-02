@@ -103,7 +103,8 @@ App.module('Editor', function(Editor, App, Backbone, Marionette, $, _) {
     Editor.InstanceView = Backbone.Marionette.ItemView.extend({
         template: "#instance-editor-tmpl",
         ui: {
-            fields: ".fields"
+            fields: ".fields",
+            body: ".body"
         },
         templateHelpers: {
             getFields: function() {
@@ -116,6 +117,18 @@ App.module('Editor', function(Editor, App, Backbone, Marionette, $, _) {
         },
         toggleFields: function() {
             this.ui.fields.toggle();
+        },
+        onRender: function() {
+            var concept = this.model.get('parent');
+            concept.get('load')(this.$el, this.model.get('values'));
+
+            this.body_cm = CodeMirror.fromTextArea(this.ui.body.get(0), {
+                mode: concept.get('mode'),
+                lineNumbers: true
+            });
+
+            var self = this;
+            setTimeout(function(){self.body_cm.refresh();}, 20);
         }
     });
 });
