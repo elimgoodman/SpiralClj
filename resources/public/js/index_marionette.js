@@ -1,18 +1,17 @@
 var App = new Backbone.Marionette.Application();
 
 App.addRegions({
-    concepts: "#concept-list",
+    concept_list: "#concept-list",
     editor: "#editor"
 });
-
-App.start();
-
 
 App.module('Models', function(Models, App, Backbone, Marionette, $, _) {
 
     Models.Instance = Backbone.Model.extend({
         defaults: {
-            values: {}
+            values: {},
+            name: "",
+            body: ""
         },
         initialize: function() {
             var values = {};
@@ -36,14 +35,15 @@ App.module('Models', function(Models, App, Backbone, Marionette, $, _) {
             css_rules: {}
         },
         initialize: function() {
-            var tmpl_selector = "#" + this.get('name') + "-editor";
-            this.editor_tmpl = _.template($(tmpl_selector).html());
-
             if(this.get('instances') == undefined) {
                 this.set({
-                    instances: new S.InstanceCollection()
+                    instances: new Models.InstanceCollection()
                 }, {silent: true});
             }
+        },
+        fetchFieldTmpl: function() {
+            var tmpl_selector = "#" + this.get('name') + "-editor";
+            this.field_tmpl = _.template($(tmpl_selector).html());
         }
     });
 
@@ -54,4 +54,83 @@ App.module('Models', function(Models, App, Backbone, Marionette, $, _) {
     Models.ConceptCollection = Backbone.Collection.extend({
         model: Models.Concept
     });
+});
+
+App.module('ConceptList', function(ConceptList, App, Backbone, Marionette, $, _) {
+    
+    ConceptList.ConceptView = Backbone.Marionette.Layout.extend({
+        template: "#concept-list-tmpl",
+        modelEvents: {
+            'change': 'render'
+        },
+        regions: {
+            instances: ".instances"
+        },
+        onRender: function() {
+            this.instances.show(new ConceptList.InstanceListView({
+                collection: this.model.get('instances')
+            }));
+        },
+        className: 'concept',
+        tagName: 'li'
+    });
+
+    ConceptList.ConceptListView = Backbone.Marionette.CollectionView.extend({
+        itemView: ConceptList.ConceptView
+    });
+
+    ConceptList.InstanceView = Backbone.Marionette.ItemView.extend({
+        template: "#instance-list-tmpl",
+        tagName: 'li',
+        className: 'instance',
+        events: {
+            'click': 'showEditor'
+        },
+        showEditor: function() {
+            var v = new App.Editor.InstanceView({
+                model: this.model
+            });
+            App.editor.show(v);
+        }
+    });
+
+    ConceptList.InstanceListView = Backbone.Marionette.CollectionView.extend({
+        itemView: ConceptList.InstanceView
+    });
+});
+
+App.module('Editor', function(Editor, App, Backbone, Marionette, $, _) {
+    Editor.InstanceView = Backbone.Marionette.ItemView.extend({
+        template: "#instance-editor-tmpl",
+        ui: {
+            fields: ".fields"
+        },
+        templateHelpers: {
+            getFields: function() {
+                var concept = this.parent;
+                return concept.field_tmpl(this.values);
+            }
+        },
+        events: {
+            'click .toggle-fields': 'toggleFields'
+        },
+        toggleFields: function() {
+            this.ui.fields.toggle();
+        }
+    });
+});
+
+App.addInitializer(function(options){
+    App.Concepts.loadInstances();
+    App.Concepts.fetchFieldTmpls();
+
+    var v = new App.ConceptList.ConceptListView({
+        collection: App.Concepts.Concepts
+    });
+    
+    App.concept_list.show(v);
+});
+
+$(function() {
+    App.start();
 });

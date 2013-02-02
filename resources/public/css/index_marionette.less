@@ -1,0 +1,21 @@
+@concept-width: 200px;
+
+#concept-list {
+    width: @concept-width;
+    height: 100%;
+    top: 0;
+    left: 0;
+    position: fixed;
+    border-right: 1px solid black;
+}
+
+#editor {
+    overflow: hidden;
+    width: 100%;
+    left: @concept-width;
+    position: fixed;
+
+    .fields {
+        display: none;
+    }
+}

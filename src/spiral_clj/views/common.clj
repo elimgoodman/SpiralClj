@@ -45,11 +45,13 @@
                (js "marionette")
                ;(js "index")
                (js "index_marionette")
+               (js "concepts")
                (include-css "/css/reset.css")
                (include-css "/css/chosen.css")
                (include-css "/css/codemirror.css")
                (include-css "/css/cm-blackboard.css")
-               (less "/css/index.less")
+               ;(less "/css/index.less")
+               (less "/css/index_marionette.less")
                (js "less")]
               [:body
                [:ul#concept-list]
@@ -60,8 +62,14 @@
                ;[:div (ajax-link "stop-link" "Stop")]
               ]
               (js-template "concept-list-tmpl" 
-                           (str "&#x" (js-var "icon_code") ";"))
-              (js-template "instance-list-tmpl" (js-var "display_name"))
+                           [:div.header (js-var "display_name")
+                            [:ul.instances]])
+              (js-template "instance-list-tmpl" (js-var "name"))
+              (js-template "instance-editor-tmpl"
+                           [:div.header (js-var "name")
+                            [:a {:href "#" :class "toggle-fields"} "Toggle"]]
+                           [:div.fields (js-var "getFields()")]
+                           [:textarea.body (js-var "body")])
               (js-template "style-selector-tmpl" [:select.style])
               (js-template "pages-editor"
                            [:div.header 
