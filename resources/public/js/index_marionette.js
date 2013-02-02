@@ -70,6 +70,27 @@ App.module('Models', function(Models, App, Backbone, Marionette, $, _) {
     Models.ConceptCollection = Backbone.Collection.extend({
         model: Models.Concept
     });
+
+    Models.Method = Backbone.Model.extend({
+        defaults: {
+            body: ""
+        }
+    });
+});
+
+App.module('RunMethod', function(RunMethod, App, Backbone, Marionette, $, _) {
+    
+    RunMethod.method = new App.Models.Method();
+
+    RunMethod.Editor = Backbone.Marionette.ItemView.extend({
+        template: "#run-method-editor-tmpl"
+    });
+
+    RunMethod.getEditorView = function() {
+        return new RunMethod.Editor({
+            model: RunMethod.method
+        });
+    }
 });
 
 App.module('Sidebar', function(Sidebar, App, Backbone, Marionette, $, _) {
@@ -149,6 +170,7 @@ App.module('Sidebar', function(Sidebar, App, Backbone, Marionette, $, _) {
             'click .delete-link': 'deleteInstance'
         },
         setSelection: function() {
+            App.Editor.mode = 'instance';
             App.Selections.Instance.set(this.model);
         },
         deleteInstance: function() {
@@ -164,7 +186,8 @@ App.module('Sidebar', function(Sidebar, App, Backbone, Marionette, $, _) {
     Sidebar.ActionLinks = Backbone.Marionette.View.extend({
         el: "#action-links",
         events: {
-            'click #save-link': 'save'
+            'click #save-link': 'save',
+            'click #run-method-link': 'editRunMethod'
         },
         save: function(e) {
             if(App.Selections.Instance.get()) {
@@ -175,13 +198,22 @@ App.module('Sidebar', function(Sidebar, App, Backbone, Marionette, $, _) {
 
             App.Concepts.Concepts.each(function(c){
                 data[c.get('name')] = c.get('instances').map(function(i){
-                    return i.get('values');
+                    return {
+                        name: i.get('name'),
+                        body: i.get('body'),
+                        values: i.get('values')
+                    };
                 });
             });
 
             $.post("/save", {instances: data});
 
             e.preventDefault();
+        },
+        editRunMethod: function() {
+            App.Editor.mode = 'run-method';
+            var v = new App.RunMethod.getEditorView();
+            App.editor.show(v);
         }
     });
 });
@@ -218,6 +250,8 @@ App.module('Selections', function(Selections, App, Backbone, Marionette, $, _) {
 
 App.module('Editor', function(Editor, App, Backbone, Marionette, $, _) {
     
+    Editor.mode = null;
+
     Editor.InstanceView = Backbone.Marionette.ItemView.extend({
         template: "#instance-editor-tmpl",
         ui: {
@@ -260,17 +294,25 @@ App.module('Editor', function(Editor, App, Backbone, Marionette, $, _) {
     }
 
     App.editor.on('show', function(view) {
-        var instance = App.Selections.Instance.get();
-        var concept = instance.get('parent');
-        concept.get('load')(view.$el, instance.get('values'));
-        
-        var body = view.$('.body');
-        body.val(instance.get('body'));
+        if(Editor.mode == 'instance') {
+            var instance = App.Selections.Instance.get();
+            var concept = instance.get('parent');
+            concept.get('load')(view.$el, instance.get('values'));
+            
+            var body = view.$('.body');
+            body.val(instance.get('body'));
 
-        view.body_cm = CodeMirror.fromTextArea(body.get(0), {
-            mode: concept.get('mode'),
-            lineNumbers: true
-        });
+            view.body_cm = CodeMirror.fromTextArea(body.get(0), {
+                mode: concept.get('mode'),
+                lineNumbers: true
+            });
+        } else {
+            var body = view.$('.body');
+            view.body_cm = CodeMirror.fromTextArea(body.get(0), {
+                mode: 'clojure',
+                lineNumbers: true
+            });
+        }
     });
 
     App.Editor.save = function() {

@@ -1,16 +1,21 @@
 App.module('Concepts', function(Concepts, App, Backbone, Marionette, $, _) {
     
-    var style_binding = function(root) {
+    var style_binding = function(root, values) {
         var style_selector = root.find(".style-selector");
 
         Concepts.Concepts.find(function(c){
             return c.get('name') == 'styles';
         }).get('instances').each(function(i){
-            var name = i.get('values')['name'];
+            var name = i.get('name');
             var icon = "<span class='icon style-icon'>&#xf040;</span>";
-            var name = "<span class='style-name'>" + name + "</span>";
+            var name_span = "<span class='style-name'>" + name + "</span>";
             var type = ":Style";
-            var option = $("<option>").attr('value', name).html(icon + name + type);
+            var option = $("<option>").attr('value', name).html(icon + name_span + type);
+
+            if(_.contains(values.styles, name)) {
+                option.attr('selected', true);
+            }
+
             style_selector.append(option);
         });
 
@@ -38,7 +43,7 @@ App.module('Concepts', function(Concepts, App, Backbone, Marionette, $, _) {
             Concepts.Concepts.find(function(c){
                 return c.get('name') == 'layouts';
             }).get('instances').each(function(i){
-                var name = i.get('values')['name'];
+                var name = i.get('name');
                 var option = $("<option>").attr('value', name).html(name);
                 
                 if(values.layout == name) {
@@ -51,11 +56,9 @@ App.module('Concepts', function(Concepts, App, Backbone, Marionette, $, _) {
             layout_select.chosen();
         },
         save: function(root) {
-            return {
+             return {
                 url: root.find('.url').val(),
-                styles: _.map(root.find('.style'), function(s){
-                    return $(s).val();
-                }),
+                styles: root.find('.style-selector').val(),
                 layout: root.find('.layout').val()
             };
         }
@@ -124,9 +127,9 @@ App.module('Concepts', function(Concepts, App, Backbone, Marionette, $, _) {
                 _.each(instances, function(vals){
                     instance_coll.push(new App.Models.Instance({
                         parent: concept,
-                        name: "Some name",
-                        body: "Foo bar",
-                        values: vals
+                        name: vals.name,
+                        body: vals.body,
+                        values: vals.values
                     }));
                 });
 
@@ -145,6 +148,6 @@ App.module('Concepts', function(Concepts, App, Backbone, Marionette, $, _) {
         pages, 
         layouts, 
         styles, 
-        partials
+        //partials
     ]);
 });

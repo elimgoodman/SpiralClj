@@ -44,6 +44,7 @@
                (js "codemirror")
                (js "mode/xml")
                (js "mode/css")
+               (js "mode/clojure")
                (js "chosen")
                (js "marionette")
                ;(js "index")
@@ -60,7 +61,8 @@
                [:div#sidebar
                 [:ul#concept-list]
                 [:div#action-links
-                 [:div.action-link (ajax-link "save-link" (icon "F059"))]]]
+                 [:div.action-link (ajax-link "save-link" (icon "F059"))]
+                 [:div.action-link (ajax-link "run-method-link" (icon "F0B1"))]]]
                [:div#editor]
                ;[:div (ajax-link "add-instance-link" "Add")]
                ;[:div (ajax-link "save-link" "Save")]
@@ -87,6 +89,12 @@
                              "<% } %>"
                             ]
                            [:div.fields (js-var "getFields()")]
+                           [:textarea.body (js-var "body")])
+              (js-template "run-method-editor-tmpl"
+                           [:div.header 
+                            [:span.icon.parent-icon (icon "F0B1")]
+                            [:span [:span.name "RunMethod"] ":Clojure"]
+                            ]
                            [:textarea.body (js-var "body")])
               (js-template "style-selector-tmpl" [:select.style])
               (js-template "pages-editor"
