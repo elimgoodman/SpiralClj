@@ -91,6 +91,12 @@ App.module('RunMethod', function(RunMethod, App, Backbone, Marionette, $, _) {
             model: RunMethod.method
         });
     }
+
+    RunMethod.fetchRunMethod = function() {
+        $.getJSON("/run_method", function(data){
+            RunMethod.method = new App.Models.Method(data);
+        });
+    }
 });
 
 App.module('Sidebar', function(Sidebar, App, Backbone, Marionette, $, _) {
@@ -190,9 +196,7 @@ App.module('Sidebar', function(Sidebar, App, Backbone, Marionette, $, _) {
             'click #run-method-link': 'editRunMethod'
         },
         save: function(e) {
-            if(App.Selections.Instance.get()) {
-                App.Editor.save();
-            }
+            App.Editor.save();
 
             var data = {};
 
@@ -205,8 +209,15 @@ App.module('Sidebar', function(Sidebar, App, Backbone, Marionette, $, _) {
                     };
                 });
             });
+            
+            var run_method = App.RunMethod.method.toJSON();
+            
+            var params = {
+                instances: data,
+                run_method: run_method
+            };
 
-            $.post("/save", {instances: data});
+            $.post("/save", {params: JSON.stringify(params)}, function(data){}, "json");
 
             e.preventDefault();
         },
@@ -316,21 +327,29 @@ App.module('Editor', function(Editor, App, Backbone, Marionette, $, _) {
     });
 
     App.Editor.save = function() {
-        var instance = App.Selections.Instance.get();
-        var concept = instance.get('parent');
-        var values = concept.get('save')(App.editor.$el);
+        if(Editor.mode == 'instance') {
+            var instance = App.Selections.Instance.get();
+            if(!instance) {return;}
+            var concept = instance.get('parent');
+            var values = concept.get('save')(App.editor.$el);
 
-        instance.set({
-            values: values,
-            body: App.editor.currentView.body_cm.getValue()
-        });
+            instance.set({
+                values: values,
+                body: App.editor.currentView.body_cm.getValue()
+            });
+        } else {
+            App.RunMethod.method.set({
+                body: App.editor.currentView.body_cm.getValue()
+            });
+        }
     }
 });
 
 App.addInitializer(function(options){
     App.Concepts.loadInstances();
     App.Concepts.fetchFieldTmpls();
-    
+    App.RunMethod.fetchRunMethod();
+
     new App.Sidebar.ActionLinks();
     new App.Editor.SelectionListener();
 

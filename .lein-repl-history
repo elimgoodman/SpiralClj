@@ -131,3 +131,15 @@ a
 (require '[data.json :as j])
 (require '[clojure.data.json :as j])
 (doc print)
+(vals {:a 1})
+(require '[clojure.data.json :as j])
+(def a 'hello')
+a
+(def a "{\"foo\": 1}")
+a
+(j/read-str a)
+(def b (j/read-str a))
+b
+(:foo b)
+(def b (j/read-str a :key-fn keyword))
+b

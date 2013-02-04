@@ -1,20 +1,29 @@
 (ns spiral-clj.views.common
   (:require [noir.server :as server]
-            [ring.adapter.jetty :as jetty])
+            [ring.adapter.jetty :as jetty]
+            [clojure.data.json :as j])
   (:use [noir.core :only [defpartial defpage]]
         [noir.response :only [json]]
-        [spiral-clj.dev_server :only [my-instances]]
-        [spiral-clj.serializer :only [serialize-instances]]
+        [spiral-clj.dev_server :only [my-instances my-run-method]]
+        [spiral-clj.serializer :only [serialize-instances serialize-run-method]]
         [hiccup.page :only [include-css html5 include-js]]))
 
 (defpage [:post "/save"] {:as body}
-         (let [instances (:instances body)]
+         (let [params-str (:params body)
+               params (j/read-str params-str :key-fn keyword)
+               instances (:instances params)
+               run-method (:run_method params)]
            (serialize-instances instances)
+           (serialize-run-method run-method instances)
            (dosync (ref-set my-instances instances))
+           (dosync (ref-set my-run-method run-method))
            (json {:success true})))
 
 (defpage "/instances" []
          (json @my-instances))
+
+(defpage "/run_method" []
+         (json @my-run-method))
 
 (defpartial js [file]
             (include-js (str "/js/" file ".js")))

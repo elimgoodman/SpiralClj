@@ -4,6 +4,7 @@
   (:use [fleet :only [fleet]]))
 
 (def my-instances (ref {}))
+(def my-run-method (ref ""))
 
 (defn get-instances [parent]
   (vals (parent @my-instances)))

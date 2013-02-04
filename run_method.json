@@ -1,0 +1,1 @@
+{"body":"(ns spiral-clj.servr\n  (:require [noir.server :as server])\n  (:use [noir.core :only [defpage]]))\n\n\n{{#pages}}\n(defpage \"{{#values}}{{url}}{{\/values}}\" []\n  \"{{body}}\")\n{{\/pages}}\n\n\n(defn -main [& m]\n    (server\/start 5000)\n\n"}
