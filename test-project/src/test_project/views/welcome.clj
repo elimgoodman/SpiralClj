@@ -2,8 +2,7 @@
   (:require [test-project.views.common :as common])
   (:use [noir.core :only [defpage]]))
 
-(defpage "/welcome" []
-         (common/layout
-           [:p "Welcome to test-project"]))
+(defn get-template [name]
+  (slurp (str "./templates/" name ".html")))
 
 {{page-routes}}

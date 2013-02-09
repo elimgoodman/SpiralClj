@@ -2,9 +2,8 @@
   (:require [test-project.views.common :as common])
   (:use [noir.core :only [defpage]]))
 
-(defpage "/welcome" []
-         (common/layout
-           [:p "Welcome to test-project"]))
+(defn get-template [name]
+  (slurp (str "./templates/" name ".html")))
 
-(defpage "/beeeep" [])
-(defpage "/foo" [])
+(defpage "/" [] (get-template "hello"))
+(defpage "/foo" [] (get-template "beeo"))

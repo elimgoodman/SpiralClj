@@ -17,7 +17,7 @@
 
 (def tmpl-path "./test-project/")
 (def target-path "./test-project-target/")
-(def page-route-template "(defpage \"{{values.url}}\" [])")
+(def page-route-template "(defpage \"{{values.url}}\" [] (get-template \"{{name}}\"))")
 
 (defn copy-file [src-path dest-path]
   (io/copy (io/file src-path) (io/file dest-path)))
@@ -38,7 +38,8 @@
 
 (defn get-extension-for-concept [concept]
   (case concept 
-    :styles "css"))
+    :styles "css"
+    :pages "html"))
 
 (defn inject [instances]
   (let [context (make-context instances)
@@ -54,8 +55,9 @@
                       parent-target-path (make-target-path parent-path)
                       extension (get-extension-for-concept concept-to-inject)]
                   (doseq [instance (concept-to-inject instances)]
-                    (let [target-instance-path (str parent-target-path "/" (:name instance) "." extension)]
-                      (println target-instance-path)
+                    (let [instance-name (:name instance)
+                          filename (str instance-name "." extension)
+                          target-instance-path (str parent-target-path "/" filename)]
                       (spit target-instance-path (:body instance)))))
               (.isFile tmpl-file)
                 (let [contents (slurp path)
