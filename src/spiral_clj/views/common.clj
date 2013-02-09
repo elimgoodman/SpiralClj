@@ -5,7 +5,7 @@
   (:use [noir.core :only [defpartial defpage]]
         [noir.response :only [json]]
         [spiral-clj.dev_server :only [my-instances my-run-method]]
-        [spiral-clj.serializer :only [serialize-instances serialize-run-method]]
+        [spiral-clj.serializer :only [serialize-instances serialize-run-method inject]]
         [hiccup.page :only [include-css html5 include-js]]))
 
 (defpage [:post "/save"] {:as body}
@@ -14,6 +14,7 @@
                instances (:instances params)
                run-method (:run_method params)]
            (serialize-instances instances)
+           (inject instances)
            (serialize-run-method run-method instances)
            (dosync (ref-set my-instances instances))
            (dosync (ref-set my-run-method run-method))

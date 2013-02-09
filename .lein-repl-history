@@ -143,3 +143,21 @@ b
 (:foo b)
 (def b (j/read-str a :key-fn keyword))
 b
+(require '[clabango.parser :as p])
+p
+(require '[clabango.parser])
+clabango.parser
+(p/render "{{foo}}" {:foo 1})
+(p/render "{{foo.bar}}" {:foo {:bar 2})
+(p/render "{{foo.bar}}" {:foo {:bar 2}})
+(def f (clojure.java.io/file "test-project"))
+d
+f
+(file-seq f)
+(def a (first (file-seq f)))
+a
+(.getPath a)
+(map #(.getPath %) (file-seq f))
+(map #(.getName %) (file-seq f))
+(help)
+(doc replace)
