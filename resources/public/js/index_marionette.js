@@ -205,7 +205,8 @@ App.module('Sidebar', function(Sidebar, App, Backbone, Marionette, $, _) {
                     return {
                         name: i.get('name'),
                         body: i.get('body'),
-                        values: i.get('values')
+                        values: i.get('values'),
+                        parent: i.get('parent').get('name')
                     };
                 });
             });

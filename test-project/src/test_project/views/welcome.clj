@@ -5,4 +5,6 @@
 (defn get-template [name]
   (slurp (str "./templates/" name ".html")))
 
-{{page-routes}}
+{% for page in instances.pages %}
+{% inject page as route %}
+{% endfor %}

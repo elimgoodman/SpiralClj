@@ -5,5 +5,8 @@
 (defn get-template [name]
   (slurp (str "./templates/" name ".html")))
 
+
 (defpage "/" [] (get-template "hello"))
+
 (defpage "/foo" [] (get-template "beeo"))
+

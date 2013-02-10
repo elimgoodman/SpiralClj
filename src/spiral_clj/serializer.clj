@@ -1,6 +1,7 @@
 (ns spiral-clj.serializer
   (:require [clojure.data.json :as json]
             [clabango.parser :refer [render]]
+            [clabango.tags :refer [deftemplatetag]]
             [clojure.java.io :as io]
             [clojure.string :as string]))
 
@@ -15,18 +16,38 @@
   (do
     (serialize-obj method "run_method.json")))
 
+;-------------------------------------------------------
+;-------------------------------------------------------
+;-------------------------------------------------------
+
 (def tmpl-path "./test-project/")
 (def target-path "./test-project-target/")
 (def page-route-template "(defpage \"{{values.url}}\" [] (get-template \"{{name}}\"))")
 
-(defn copy-file [src-path dest-path]
-  (io/copy (io/file src-path) (io/file dest-path)))
+(defn parse-injection-args [args]
+  (let [instance-name (keyword (first args))
+        view (nth args 2)]
+    {:instance-name instance-name, :view view}))
 
-(defn make-page-routes [pages]
-  (string/join "\n" (map #(render page-route-template %) pages)))
+(defn get-view [concept-name view]
+  (case concept-name
+    "pages" (case view
+             "route" page-route-template)))
+
+(deftemplatetag "inject" [nodes context]
+  (let [node (first nodes)
+        args (:args node)
+        parsed (parse-injection-args args)
+        instance-name (:instance-name parsed)
+        view (:view parsed)
+        instance ((keyword instance-name) context)
+        concept-name (:parent instance)
+        tmpl (get-view concept-name view)
+        rendered (string/trim (render tmpl instance))]
+    {:string rendered}))
 
 (defn make-context [instances]
-  {:page-routes (make-page-routes (:pages instances))})
+  {:instances instances})
 
 (defn get-paths [root]
   (let [f (io/file root)
