@@ -3,7 +3,8 @@
             [clabango.parser :refer [render]]
             [clabango.tags :refer [deftemplatetag]]
             [clojure.java.io :as io]
-            [clojure.string :as string]))
+            [clojure.string :as string])
+  (:use [spiral-clj.dev_server :only [my-instances]]))
 
 (defn serialize-obj [obj filename]
   (with-open [wrtr (io/writer filename)]
@@ -23,31 +24,71 @@
 (def tmpl-path "./test-project/")
 (def target-path "./test-project-target/")
 (def page-route-template "(defpage \"{{values.url}}\" [] (get-template \"{{name}}\"))")
+(def page-file-template "{% inject layout as file with page-body=body %}")
+(def layout-file-template "<cool>{{page-body}}</cool>")
+(def default-file-template "{{body}}")
 
-(defn parse-injection-args [args]
-  (let [instance-name (keyword (first args))
-        view (nth args 2)]
-    {:instance-name instance-name, :view view}))
+(defn re-match [pattern s]
+  (second (re-find pattern s)))
 
-(defn get-view [concept-name view]
+(defn parse-assignment [assignment-str]
+  (let [pieces (string/split assignment-str #"=")
+        k (first pieces)
+        v (second pieces)]
+    {:key k
+     :val v}))
+
+(defn parse-assignments [assignment-str]
+  (if (nil? assignment-str)
+    nil 
+    (let [assignments (string/split assignment-str #",")
+          parsed (map parse-assignment assignments)]
+          parsed)))
+
+(defn parse-injection-args [s]
+  (let [instance-name (re-match #"^([^\s]+)" s)
+        view (re-match #"as ([^\s]+)" s)
+        assignments (re-match #"with (.+)$" s)]
+    {:instance-name (keyword instance-name)
+     :view (keyword view)
+     :assignments (parse-assignments assignments)}))
+
+(defn get-view-tmpl [concept-name view]
   (case concept-name
-    "pages" (case view
-             "route" page-route-template)))
+    :layouts (case view
+               :file layout-file-template)
+    :styles (case view
+              :file default-file-template)
+    :pages (case view
+             :route page-route-template
+             :file page-file-template)))
+
+(defn get-view-context [concept-name view instance]
+  (case concept-name
+    :pages (case view
+             :file (let [layout-name (:layout (:values instance))
+                         layouts (:layouts @my-instances)
+                         layout (get-instance-by-name layouts layout-name)]
+                     {:layout layout})
+             instance)
+    :layouts (case view
+               :file {:page-body "beeeep"})
+    instance))
+
 
 (deftemplatetag "inject" [nodes context]
   (let [node (first nodes)
         args (:args node)
-        parsed (parse-injection-args args)
+        arg-str (string/join " " args)
+        parsed (parse-injection-args arg-str)
         instance-name (:instance-name parsed)
         view (:view parsed)
         instance ((keyword instance-name) context)
-        concept-name (:parent instance)
-        tmpl (get-view concept-name view)
-        rendered (string/trim (render tmpl instance))]
+        concept-name (keyword (:parent instance))
+        tmpl (get-view-tmpl concept-name view)
+        context (get-view-context concept-name view instance)
+        rendered (string/trim (render tmpl context))]
     {:string rendered}))
-
-(defn make-context [instances]
-  {:instances instances})
 
 (defn get-paths [root]
   (let [f (io/file root)
@@ -65,28 +106,21 @@
 (defn get-instance-by-name [instances name]
   (first (filter #(= (:name %) name) instances)))
 
-(defn get-instance-body [concept instance instances]
-  (case concept 
-    :styles (:body instance)
-    :layouts (:body instance)
-    :pages (let [layout-name (:layout (:values instance))
-                 layouts (:layouts instances)
-                 layout (get-instance-by-name layouts layout-name)
-                 layout-body (get-instance-body :layouts layout instances)]
-             layout-body)))
-
-(defn inject-files [tmpl-file instances]
+(defn inject-files [tmpl-file]
   (let [path (.getPath tmpl-file)
         contents (slurp path)
         concept-to-inject (-> contents string/trim keyword)
         parent-path (.getParent tmpl-file)
         parent-target-path (make-target-path parent-path)
         extension (get-extension-for-concept concept-to-inject)]
-    (doseq [instance (concept-to-inject instances)]
+    (doseq [instance (concept-to-inject @my-instances)]
       (let [instance-name (:name instance)
             filename (str instance-name "." extension)
-            target-instance-path (str parent-target-path "/" filename)]
-        (spit target-instance-path (get-instance-body concept-to-inject instance instances))))))
+            target-instance-path (str parent-target-path "/" filename)
+            view :file
+            tmpl (get-view-tmpl concept-to-inject view)
+            context (get-view-context concept-to-inject view instance)]
+        (spit target-instance-path (render tmpl context))))))
 
 (defn inject-file [path target-path context]
   (let [contents (slurp path)
@@ -94,7 +128,7 @@
     (spit target-path injected)))
 
 (defn inject [instances]
-  (let [context (make-context instances)
+  (let [context {:instances @my-instances}
         paths (get-paths tmpl-path)]
     (doseq [path paths]
       (let [target-path (make-target-path path)
@@ -102,7 +136,7 @@
             target-file (io/file target-path)]
         (cond (.isFile tmpl-file)
                 (if (= (.getName tmpl-file) "_injections")
-                  (inject-files tmpl-file instances)
+                  (inject-files tmpl-file)
                   (inject-file path target-path context))
               (.isDirectory tmpl-file)
                 (.mkdirs target-file))))))
