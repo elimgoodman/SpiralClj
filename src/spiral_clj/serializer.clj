@@ -41,6 +41,37 @@
     :styles "css"
     :pages "html"))
 
+(defn get-instance-by-name [instances name]
+  (first (filter #(= (:name %) name) instances)))
+
+(defn get-instance-body [concept instance instances]
+  (case concept 
+    :styles (:body instance)
+    :layouts (:body instance)
+    :pages (let [layout-name (:layout (:values instance))
+                 layouts (:layouts instances)
+                 layout (get-instance-by-name layouts layout-name)
+                 layout-body (get-instance-body :layouts layout instances)]
+             layout-body)))
+
+(defn inject-files [tmpl-file instances]
+  (let [path (.getPath tmpl-file)
+        contents (slurp path)
+        concept-to-inject (-> contents string/trim keyword)
+        parent-path (.getParent tmpl-file)
+        parent-target-path (make-target-path parent-path)
+        extension (get-extension-for-concept concept-to-inject)]
+    (doseq [instance (concept-to-inject instances)]
+      (let [instance-name (:name instance)
+            filename (str instance-name "." extension)
+            target-instance-path (str parent-target-path "/" filename)]
+        (spit target-instance-path (get-instance-body concept-to-inject instance instances))))))
+
+(defn inject-file [path target-path context]
+  (let [contents (slurp path)
+        injected (render contents context)]
+    (spit target-path injected)))
+
 (defn inject [instances]
   (let [context (make-context instances)
         paths (get-paths tmpl-path)]
@@ -48,20 +79,9 @@
       (let [target-path (make-target-path path)
             tmpl-file (io/file path)
             target-file (io/file target-path)]
-        (cond (= (.getName tmpl-file) "_injections")
-                (let [contents (slurp path)
-                      concept-to-inject (-> contents string/trim keyword)
-                      parent-path (.getParent tmpl-file)
-                      parent-target-path (make-target-path parent-path)
-                      extension (get-extension-for-concept concept-to-inject)]
-                  (doseq [instance (concept-to-inject instances)]
-                    (let [instance-name (:name instance)
-                          filename (str instance-name "." extension)
-                          target-instance-path (str parent-target-path "/" filename)]
-                      (spit target-instance-path (:body instance)))))
-              (.isFile tmpl-file)
-                (let [contents (slurp path)
-                      injected (render contents context)]
-                  (spit target-path injected))
+        (cond (.isFile tmpl-file)
+                (if (= (.getName tmpl-file) "_injections")
+                  (inject-files tmpl-file instances)
+                  (inject-file path target-path context))
               (.isDirectory tmpl-file)
                 (.mkdirs target-file))))))
