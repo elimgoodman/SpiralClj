@@ -252,3 +252,11 @@ b
 (inc 2)
 (map (partial (-> inc inc)) [1 2 3])
 ((-> inc inc) 1)
+(doc flip_
+)
+(doc flip)
+(doc identity(
+))
+(doc identity)
+(identity 1)
+(doc get-in)

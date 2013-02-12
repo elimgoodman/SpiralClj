@@ -75,6 +75,9 @@
                :file {:page-body "beeeep"})
     instance))
 
+(defn merge-assignments [context assignments instance]
+  (let [assigned {}]
+    (merge context assigned)))
 
 (deftemplatetag "inject" [nodes context]
   (let [node (first nodes)
@@ -83,10 +86,12 @@
         parsed (parse-injection-args arg-str)
         instance-name (:instance-name parsed)
         view (:view parsed)
+        assignments (:assignments parsed)
         instance ((keyword instance-name) context)
         concept-name (keyword (:parent instance))
         tmpl (get-view-tmpl concept-name view)
         context (get-view-context concept-name view instance)
+        assigned (merge-assignments context assignments instance)
         rendered (string/trim (render tmpl context))]
     {:string rendered}))
 
