@@ -63,21 +63,35 @@
              :route page-route-template
              :file page-file-template)))
 
-(defn get-view-context [concept-name view instance]
+(defn get-additional-context [concept-name view instance]
   (case concept-name
     :pages (case view
              :file (let [layout-name (:layout (:values instance))
                          layouts (:layouts @my-instances)
                          layout (get-instance-by-name layouts layout-name)]
                      {:layout layout})
-             instance)
-    :layouts (case view
-               :file {:page-body "beeeep"})
-    instance))
+             {})
+    ;:layouts (case view
+               ;:file {:page-body "beeeep"})
+    {}))
 
-(defn merge-assignments [context assignments instance]
-  (let [assigned {}]
-    (merge context assigned)))
+(defn get-view-context [concept-name view instance]
+  (merge instance (get-additional-context concept-name view instance)))
+
+(defn apply-assignment [context new-context assignment]
+  (let [k (:key assignment)
+        v (:val assignment)
+        k-keyword (keyword k)
+        v-keyword (keyword v)
+        context-value (v-keyword context)]
+    (assoc new-context k-keyword context-value)))
+
+(defn merge-assignments [view-context context assignments]
+  (if (empty? assignments)
+    view-context
+    (let [f (partial apply-assignment context)
+          assigned (reduce f {} assignments)]
+      (merge view-context assigned))))
 
 (deftemplatetag "inject" [nodes context]
   (let [node (first nodes)
@@ -90,9 +104,10 @@
         instance ((keyword instance-name) context)
         concept-name (keyword (:parent instance))
         tmpl (get-view-tmpl concept-name view)
-        context (get-view-context concept-name view instance)
-        assigned (merge-assignments context assignments instance)
-        rendered (string/trim (render tmpl context))]
+        view-context (get-view-context concept-name view instance)
+        assigned (merge-assignments view-context context assignments)
+        rendered (string/trim (render tmpl assigned))]
+    (if (empty? assignments) nil (println assigned))
     {:string rendered}))
 
 (defn get-paths [root]
