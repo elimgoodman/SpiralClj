@@ -3,10 +3,7 @@
   (:use [noir.core :only [defpage]]))
 
 (defn get-template [name]
-  (slurp (str "./templates/" name ".html")))
-
+  (slurp (str "./templates/" name ".jinja")))
 
 (defpage "/" [] (get-template "hello"))
-
 (defpage "/foo" [] (get-template "beeo"))
-

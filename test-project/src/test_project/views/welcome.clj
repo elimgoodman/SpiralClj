@@ -3,8 +3,6 @@
   (:use [noir.core :only [defpage]]))
 
 (defn get-template [name]
-  (slurp (str "./templates/" name ".html")))
+  (slurp (str "./templates/" name ".jinja")))
 
-{% for page in instances.pages %}
-{% inject page as route %}
-{% endfor %}
+{{routes}}

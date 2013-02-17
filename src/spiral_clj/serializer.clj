@@ -23,7 +23,78 @@
 
 (def tmpl-path "./test-project/")
 (def target-path "./test-project-target/")
+
 (def page-route-template "(defpage \"{{values.url}}\" [] (get-template \"{{name}}\"))")
+(def style-link-template "<link rel='stylesheet' type='text/css' href='/css/{{name}}.css' />")
+
+(defn get-instance-by-name [instances name]
+  (first (filter #(= (:name %) name) instances)))
+
+(defn serialize-route [page]
+  (render page-route-template page))
+
+(defn serialize-routes [instances]
+  (let [pages (:pages instances)
+        serialized (map serialize-route pages)]
+    (string/join "\n" serialized)))
+
+(defn serialize-style [style]
+  (render style-link-template style))
+
+(defn serialize-styles [styles]
+  (let [serialized (map serialize-style styles)]
+    (string/join "\n" serialized)))
+
+(defn inject-page-routes [instances]
+  (let [route-file "src/test_project/views/welcome.clj"
+        tmpl-file-path (str tmpl-path route-file)
+        target-file-path (str target-path route-file)
+        tmpl-str (slurp tmpl-file-path)
+        routes-str (serialize-routes instances)
+        rendered (render tmpl-str {:routes routes-str})]
+    (spit target-file-path rendered)))
+
+(defn render-page-body [page instances]
+  (let [layout-name (-> page :values :layout)
+        layouts (:layouts instances)
+        layout (get-instance-by-name layouts layout-name)
+        layout-body (:body layout)
+        page-body (:body page)
+        all-styles (:styles instances)
+        style-names (-> page :values :styles)
+        styles (map #(get-instance-by-name all-styles %) style-names)
+        styles-serialized (serialize-styles styles)]
+    (render layout-body {:content page-body :styles styles-serialized})))
+
+(defn inject-template-files [instances]
+  (let [pages (:pages instances)
+        pages-dir "templates/"
+        target-dir (str target-path pages-dir)]
+    (doseq [page pages]
+      (let [filename (str (:name page) ".jinja")
+            file-path (str target-dir filename)
+            page-body (render-page-body page instances)]
+        (spit file-path page-body)))))
+  
+(defn inject-styles [instances]
+  (let [styles (:styles instances)
+        styles-dir "resources/public/css/"
+        target-dir (str target-path styles-dir)]
+    (doseq [style styles]
+      (let [filename (str (:name style) ".css")
+            file-path (str target-dir filename)]
+        (spit file-path (:body style))))))
+
+(defn inject [instances]
+  (do
+    (inject-page-routes instances)
+    (inject-template-files instances)
+    (inject-styles instances)))
+
+;-------------------------------------------------------
+;-------------------------------------------------------
+;-------------------------------------------------------
+
 (def page-file-template "{% inject layout as file with page-body=body %}")
 (def layout-file-template "<cool>{{page-body}}</cool>")
 (def default-file-template "{{body}}")
@@ -123,9 +194,6 @@
     :styles "css"
     :pages "html"))
 
-(defn get-instance-by-name [instances name]
-  (first (filter #(= (:name %) name) instances)))
-
 (defn inject-files [tmpl-file]
   (let [path (.getPath tmpl-file)
         contents (slurp path)
@@ -147,16 +215,16 @@
         injected (render contents context)]
     (spit target-path injected)))
 
-(defn inject [instances]
-  (let [context {:instances @my-instances}
-        paths (get-paths tmpl-path)]
-    (doseq [path paths]
-      (let [target-path (make-target-path path)
-            tmpl-file (io/file path)
-            target-file (io/file target-path)]
-        (cond (.isFile tmpl-file)
-                (if (= (.getName tmpl-file) "_injections")
-                  (inject-files tmpl-file)
-                  (inject-file path target-path context))
-              (.isDirectory tmpl-file)
-                (.mkdirs target-file))))))
+;(defn inject [instances]
+  ;(let [context {:instances @my-instances}
+        ;paths (get-paths tmpl-path)]
+    ;(doseq [path paths]
+      ;(let [target-path (make-target-path path)
+            ;tmpl-file (io/file path)
+            ;target-file (io/file target-path)]
+        ;(cond (.isFile tmpl-file)
+                ;(if (= (.getName tmpl-file) "_injections")
+                  ;(inject-files tmpl-file)
+                  ;(inject-file path target-path context))
+              ;(.isDirectory tmpl-file)
+                ;(.mkdirs target-file))))))

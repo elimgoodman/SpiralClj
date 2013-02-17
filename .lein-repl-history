@@ -268,3 +268,18 @@ b
 (doc into)
 (partial + 3)
 (doc assoc)
+(def a {:foo (fn [] (println "hi"))})
+a
+((:foo a))
+(def a {:a {:b 1}})
+a
+(-> :a :b a)
+(-> :b :a a)
+(:b a)
+(:a a)
+(:b (:a a))
+(-> :b :a a)
+(-> :a :b a)
+(->> :a :b a)
+(->> :b :a a)
+(-> a :a :b)
