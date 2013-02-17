@@ -30,6 +30,7 @@ a:hover {
 @layouts-color: #5E8C6A;
 @styles-color: #BFB35A;
 @partials-color: #88A65E;
+@models-color: #88A65E;
 
 
 #sidebar {
@@ -109,6 +110,16 @@ a:hover {
         }
     }
 
+    li.concept.models { 
+        .header {
+            background: @models-color;
+        }
+
+        .parent-icon {
+            color: @models-color;
+        }
+    }
+
     li.concept.partials {
         .header {
             background: @partials-color;
@@ -157,6 +168,10 @@ a:hover {
         width: 100%;
         z-index: 1000;
         display: none;
+    }
+
+    .bodyless .fields {
+        display: block;
     }
 
     li.field {

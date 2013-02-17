@@ -6,7 +6,8 @@
         [noir.response :only [json]]
         [spiral-clj.dev_server :only [my-instances my-run-method]]
         [spiral-clj.serializer :only [serialize-instances serialize-run-method inject]]
-        [hiccup.page :only [include-css html5 include-js]]))
+        [hiccup.page :only [include-css html5 include-js]]
+        [hiccup.core :only [html]]))
 
 (defpage [:post "/save"] {:as body}
          (let [params-str (:params body)
@@ -44,6 +45,17 @@
 (defn icon [code]
   (str "&#x" code ";"))
 
+(defn editor-header [include-toggle?]
+  [:div.header 
+   [:span.icon.parent-icon (icon (js-var "getParentIcon()"))]
+   [:span [:span.name (js-var "name")] ":" (js-var "getParentDisplayName()")]
+     (if (true? include-toggle?) 
+       (str "<% if (parentHasFields()) { %>"
+       (html [:a {:href "#" :class "toggle-fields icon"} (icon "F01D")])
+       "<% } %>")
+       nil)
+   ])
+
 (defpage "/" []
          (html5
               [:head
@@ -71,8 +83,7 @@
                [:div#sidebar
                 [:ul#concept-list]
                 [:div#action-links
-                 [:div.action-link (ajax-link "save-link" (icon "F059"))]
-                 [:div.action-link (ajax-link "run-method-link" (icon "F0B1"))]]]
+                 [:div.action-link (ajax-link "save-link" (icon "F059"))]]]
                [:div#editor]
                ;[:div (ajax-link "add-instance-link" "Add")]
                ;[:div (ajax-link "save-link" "Save")]
@@ -91,15 +102,12 @@
                             [:a.name {:href "#"} (js-var "name")] ":" (js-var "getParentDisplayName()")]
                            [:a {:href "#" :class "delete-link"} "Delete"])
               (js-template "instance-editor-tmpl"
-                           [:div.header 
-                            [:span.icon.parent-icon (icon (js-var "getParentIcon()"))]
-                            [:span [:span.name (js-var "name")] ":" (js-var "getParentDisplayName()")]
-                            "<% if (parentHasFields()) { %>"
-                              [:a {:href "#" :class "toggle-fields icon"} (icon "F01D")]
-                             "<% } %>"
-                            ]
+                           (editor-header true)
                            [:div.fields (js-var "getFields()")]
                            [:textarea.body (js-var "body")])
+              (js-template "instance-editor-bodyless-tmpl"
+                           (editor-header false)
+                           [:div.fields (js-var "getFields()")])
               (js-template "run-method-editor-tmpl"
                            [:div.header 
                             [:span.icon.parent-icon (icon "F0B1")]
@@ -108,6 +116,14 @@
                            [:textarea.body (js-var "body")])
               (js-template "style-selector-tmpl" [:select.style])
               (js-template "pages-editor"
+                           [:ul
+                            [:li.field
+                             [:label "URL:"][:input.field-input.url]]
+                            [:li.field
+                             [:label "Styles:"][:select.style-selector {:multiple true :data-placeholder "Add styles..."} ""]]
+                            [:li.field
+                             [:label "Layout:"][:select.layout "&nbsp;"]]])
+              (js-template "models-editor"
                            [:ul
                             [:li.field
                              [:label "URL:"][:input.field-input.url]]

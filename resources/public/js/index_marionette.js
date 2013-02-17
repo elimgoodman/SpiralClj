@@ -48,7 +48,8 @@ App.module('Models', function(Models, App, Backbone, Marionette, $, _) {
             editor_css: [],
             css_rules: {},
             load: $.noop,
-            save: $.noop
+            save: $.noop,
+            bodyless: false
         },
         initialize: function() {
             if(this.get('instances') == undefined) {
@@ -176,7 +177,6 @@ App.module('Sidebar', function(Sidebar, App, Backbone, Marionette, $, _) {
             'click .delete-link': 'deleteInstance'
         },
         setSelection: function() {
-            App.Editor.mode = 'instance';
             App.Selections.Instance.set(this.model);
         },
         deleteInstance: function() {
@@ -192,8 +192,7 @@ App.module('Sidebar', function(Sidebar, App, Backbone, Marionette, $, _) {
     Sidebar.ActionLinks = Backbone.Marionette.View.extend({
         el: "#action-links",
         events: {
-            'click #save-link': 'save',
-            'click #run-method-link': 'editRunMethod'
+            'click #save-link': 'save'
         },
         save: function(e) {
             App.Editor.save();
@@ -221,11 +220,6 @@ App.module('Sidebar', function(Sidebar, App, Backbone, Marionette, $, _) {
             $.post("/save", {params: JSON.stringify(params)}, function(data){}, "json");
 
             e.preventDefault();
-        },
-        editRunMethod: function() {
-            App.Editor.mode = 'run-method';
-            var v = new App.RunMethod.getEditorView();
-            App.editor.show(v);
         }
     });
 });
@@ -262,7 +256,18 @@ App.module('Selections', function(Selections, App, Backbone, Marionette, $, _) {
 
 App.module('Editor', function(Editor, App, Backbone, Marionette, $, _) {
     
-    Editor.mode = null;
+    var instanceHelpers = _.extend(App.Util.instanceHelpers, {
+        getFields: function() {
+            var concept = this.parent;
+            return concept.field_tmpl(this.values);
+        }
+    });
+
+    Editor.BodylessInstanceView = Backbone.Marionette.ItemView.extend({
+        template: "#instance-editor-bodyless-tmpl",
+        templateHelpers: instanceHelpers,
+        className: 'bodyless'
+    });
 
     Editor.InstanceView = Backbone.Marionette.ItemView.extend({
         template: "#instance-editor-tmpl",
@@ -270,12 +275,7 @@ App.module('Editor', function(Editor, App, Backbone, Marionette, $, _) {
             fields: ".fields",
             body: ".body"
         },
-        templateHelpers: _.extend(App.Util.instanceHelpers, {
-            getFields: function() {
-                var concept = this.parent;
-                return concept.field_tmpl(this.values);
-            }
-        }),
+        templateHelpers: instanceHelpers,
         events: {
             'click .toggle-fields': 'toggleFields'
         },
@@ -284,14 +284,26 @@ App.module('Editor', function(Editor, App, Backbone, Marionette, $, _) {
         }
     });
 
+    Editor.getInstanceViewForModel = function(model) {
+        var concept = model.get('parent');
+        if(concept.get('bodyless')) {
+            return new Editor.BodylessInstanceView({
+                model: model
+            });
+        } else {
+            return new Editor.InstanceView({
+                model: model
+            });
+        }
+    }
+
     Editor.SelectionListener = Backbone.Marionette.Controller.extend({
         initialize: function() {
             App.Selections.Instance.bind('change', this.selectionChanged, this);
         },
         selectionChanged: function() {
-            var v = new App.Editor.InstanceView({
-                model: App.Selections.Instance.get()
-            });
+            var m = App.Selections.Instance.get();
+            var v = App.Editor.getInstanceViewForModel(m);
             App.editor.show(v);
         }
     });
@@ -306,43 +318,31 @@ App.module('Editor', function(Editor, App, Backbone, Marionette, $, _) {
     }
 
     App.editor.on('show', function(view) {
-        if(Editor.mode == 'instance') {
-            var instance = App.Selections.Instance.get();
-            var concept = instance.get('parent');
-            concept.get('load')(view.$el, instance.get('values'));
-            
-            var body = view.$('.body');
-            body.val(instance.get('body'));
+        var instance = App.Selections.Instance.get();
+        var concept = instance.get('parent');
+        concept.get('load')(view.$el, instance.get('values'));
 
+        var body = view.$('.body');
+        body.val(instance.get('body'));
+
+        if(!concept.get('bodyless')) {
             view.body_cm = CodeMirror.fromTextArea(body.get(0), {
                 mode: concept.get('mode'),
-                lineNumbers: true
-            });
-        } else {
-            var body = view.$('.body');
-            view.body_cm = CodeMirror.fromTextArea(body.get(0), {
-                mode: 'clojure',
                 lineNumbers: true
             });
         }
     });
 
     App.Editor.save = function() {
-        if(Editor.mode == 'instance') {
-            var instance = App.Selections.Instance.get();
-            if(!instance) {return;}
-            var concept = instance.get('parent');
-            var values = concept.get('save')(App.editor.$el);
+        var instance = App.Selections.Instance.get();
+        if(!instance) {return;}
+        var concept = instance.get('parent');
+        var values = concept.get('save')(App.editor.$el);
 
-            instance.set({
-                values: values,
-                body: App.editor.currentView.body_cm.getValue()
-            });
-        } else {
-            App.RunMethod.method.set({
-                body: App.editor.currentView.body_cm.getValue()
-            });
-        }
+        instance.set({
+            values: values,
+            body: App.editor.currentView.body_cm.getValue()
+        });
     }
 });
 

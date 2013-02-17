@@ -28,7 +28,6 @@ App.module('Concepts', function(Concepts, App, Backbone, Marionette, $, _) {
         display_name_singular: 'Page',
         mode: 'xml',
         icon_code: 'f035',
-        id_field: 'url',
         fields: ['url', 'styles', 'layout'],
         editor_js: ["/js/codemirror.js", "/js/mode/xml.js"],
         editor_css: ["/css/codemirror.css"],
@@ -69,7 +68,6 @@ App.module('Concepts', function(Concepts, App, Backbone, Marionette, $, _) {
         display_name: 'Layouts',
         display_name_singular: 'Layout',
         icon_code: "f121",
-        id_field: 'name',
         fields: ['styles'],
         editor_js: ["/js/codemirror.js", "/js/mode/xml.js"],
         editor_css: ["/css/codemirror.css"],
@@ -86,12 +84,20 @@ App.module('Concepts', function(Concepts, App, Backbone, Marionette, $, _) {
         },
     });
 
+    var models = new App.Models.Concept({
+        name: 'models',
+        display_name: 'Models',
+        display_name_singular: 'Model',
+        icon_code: 'f0D7',
+        fields: [],
+        bodyless: true
+    });
+
     var styles = new App.Models.Concept({
         name: 'styles',
         display_name: 'Styles',
         display_name_singular: 'Style',
         icon_code: 'f040',
-        id_field: 'name',
         fields: [],
         mode: 'css'
     });
@@ -101,7 +107,6 @@ App.module('Concepts', function(Concepts, App, Backbone, Marionette, $, _) {
         display_name: 'Partials',
         display_name_singular: 'Partial',
         icon_code: "f0d6",
-        id_field: 'name',
         fields: ['styles'],
         mode: 'xml',
         load: function(root, values) {
@@ -148,6 +153,7 @@ App.module('Concepts', function(Concepts, App, Backbone, Marionette, $, _) {
         pages, 
         layouts, 
         styles, 
+        models
         //partials
     ]);
 });
