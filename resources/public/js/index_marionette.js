@@ -338,10 +338,12 @@ App.module('Editor', function(Editor, App, Backbone, Marionette, $, _) {
         if(!instance) {return;}
         var concept = instance.get('parent');
         var values = concept.get('save')(App.editor.$el);
+        
+        var body = (concept.get('bodyless')) ? null : App.editor.currentView.body_cm.getValue();
 
         instance.set({
             values: values,
-            body: App.editor.currentView.body_cm.getValue()
+            body: body
         });
     }
 });
