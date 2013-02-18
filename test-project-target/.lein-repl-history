@@ -1,0 +1,2 @@
+(require '[somnium.congomongo :as m])
+(m/create-collection! :foo)

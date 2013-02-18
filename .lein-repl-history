@@ -283,3 +283,5 @@ a
 (->> :a :b a)
 (->> :b :a a)
 (-> a :a :b)
+(require '[somnium.congomongo :as m])
+(require '[congomongo :as m])

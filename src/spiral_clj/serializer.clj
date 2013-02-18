@@ -2,6 +2,7 @@
   (:require [clojure.data.json :as json]
             [clabango.parser :refer [render]]
             [clabango.tags :refer [deftemplatetag]]
+            [clabango.filters :refer [deftemplatefilter]]
             [clojure.java.io :as io]
             [clojure.string :as string])
   (:use [spiral-clj.dev_server :only [my-instances]]))
@@ -21,14 +22,48 @@
 ;-------------------------------------------------------
 ;-------------------------------------------------------
 
+(defn slugify [s]
+  (let [replace-spaces (fn [s] (string/replace s \space \-))]
+    (-> s string/lower-case replace-spaces)))
+
+(deftemplatefilter "slugify" [node body arg]
+  (slugify body))
+
 (def tmpl-path "./test-project/")
 (def target-path "./test-project-target/")
 
 (def page-route-template "(defpage \"{{values.url}}\" [] (get-template \"{{name}}\"))")
+(def model-route-template "
+(defpage \"/{{name|slugify}}\" [] 
+  (let [objs (get-all \"{{name|slugify}}\")]
+    (all-obj-page \"{{name}}\" objs)))
+
+(defpage \"/{{name|slugify}}/new\" [] (get-template \"new-{{name|slugify}}\"))
+(defpage [:post \"/{{name|slugify}}/create\"] {:as body} 
+  (do
+    (create-obj \"{{name|slugify}}\" body)
+    (redirect \"/{{name|slugify}}\")))
+")
+(def model-new-file-template "
+<form method='post' action='/{{name|slugify}}/create'>
+  {% for field in values.model_fields %}
+    {{field.name}}: <input name='{{field.name|slugify}}'/>
+  {% endfor %}
+  <input type='submit' value='Save'/>
+</form>
+")
 (def style-link-template "<link rel='stylesheet' type='text/css' href='/css/{{name}}.css' />")
 
 (defn get-instance-by-name [instances name]
   (first (filter #(= (:name %) name) instances)))
+
+(defn serialize-model-route [model]
+  (render model-route-template model))
+
+(defn serialize-model-routes [instances]
+  (let [models (:models instances)
+        serialized (map serialize-model-route models)]
+    (string/join "\n" serialized)))
 
 (defn serialize-route [page]
   (render page-route-template page))
@@ -51,7 +86,8 @@
         target-file-path (str target-path route-file)
         tmpl-str (slurp tmpl-file-path)
         routes-str (serialize-routes instances)
-        rendered (render tmpl-str {:routes routes-str})]
+        model-routes-str (serialize-model-routes instances)
+        rendered (render tmpl-str {:routes routes-str :model-routes model-routes-str})]
     (spit target-file-path rendered)))
 
 (defn render-page-body [page instances]
@@ -85,10 +121,23 @@
             file-path (str target-dir filename)]
         (spit file-path (:body style))))))
 
+(defn inject-new-model-file [model dir]
+  (let [name-slug (-> model :name slugify)
+        path (str dir "new-" name-slug ".jinja")]
+    (spit path (render model-new-file-template model))))
+
+(defn inject-model-files [instances]
+  (let [models (:models instances)
+        template-dir "templates/"
+        target-dir (str target-path template-dir)]
+    (doseq [model models]
+      (inject-new-model-file model target-dir))))
+
 (defn inject [instances]
   (do
     (inject-page-routes instances)
     (inject-template-files instances)
+    (inject-model-files instances)
     (inject-styles instances)))
 
 ;-------------------------------------------------------
