@@ -126,11 +126,12 @@
               (js-template "models-editor"
                            [:ul
                             [:li.field
-                             [:label "URL:"][:input.field-input.url]]
-                            [:li.field
-                             [:label "Styles:"][:select.style-selector {:multiple true :data-placeholder "Add styles..."} ""]]
-                            [:li.field
-                             [:label "Layout:"][:select.layout "&nbsp;"]]])
+                             [:label "Fields:"][:ul.model-fields]
+                             [:a.add-model-field {:href "#"} "Add"]
+                             [:li.model-field.template
+                              [:label "Name:"][:input.name]
+                              [:label "Type"][:select.types "&nbsp;"]
+                              [:a.remove-model-field {:href "#"} "X"]]]])
               (js-template "layouts-editor"
                            [:ul
                             [:li.field

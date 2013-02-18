@@ -90,7 +90,55 @@ App.module('Concepts', function(Concepts, App, Backbone, Marionette, $, _) {
         display_name_singular: 'Model',
         icon_code: 'f0D7',
         fields: [],
-        bodyless: true
+        bodyless: true,
+        load: function(root, values) {
+            //Populate the select
+            var type_select = root.find("select.types");
+            var types = ['Int', 'String', 'Float', 'Boolean'];
+            _.each(types, function(type){
+                var o = $("<option>").attr('value', type).html(type);
+                type_select.append(o);
+            });
+            
+            var field_list = root.find(".model-fields");
+            var field_tmpl = root.find(".model-field.template");
+            
+            var add_field = function() {
+                var n = field_tmpl.clone().removeClass('template');
+                field_list.append(n);
+                n.find("select.types").chosen();
+                n.find('.remove-model-field').click(function(){
+                    $(this).parents("li.model-field").remove();
+                });
+                return n;
+            }
+
+            _.each(values.model_fields, function(field){
+                var n = add_field();
+                
+                n.find(".name").val(field.name);
+                n.find(".types").val(field.type);
+            });
+
+            root.find(".add-model-field").click(function(){
+                add_field();
+            });
+        },
+        save: function(root) {
+            var model_fields = [];
+            root.find(".model-fields").children().each(function(){
+                var name = $(this).find('.name').val();
+                var type = $(this).find("select.types").val();
+                model_fields.push({
+                    name: name,
+                    type: type
+                });
+            });
+
+            return {
+                model_fields: model_fields
+            };
+        }
     });
 
     var styles = new App.Models.Concept({
@@ -150,10 +198,10 @@ App.module('Concepts', function(Concepts, App, Backbone, Marionette, $, _) {
     }
 
     Concepts.Concepts = new App.Models.ConceptCollection([
+        models,
         pages, 
         layouts, 
         styles, 
-        models
         //partials
     ]);
 });
