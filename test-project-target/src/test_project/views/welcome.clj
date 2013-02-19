@@ -29,27 +29,34 @@
       (m/create-collection! coll)
       (m/insert! coll body))))
 
+
 (defpage "/" [] (get-template "hello"))
+
 (defpage "/foo" [] (get-template "beeo"))
+
 (defpage "" [] (get-template "Space in here"))
+
 
 
 (defpage "/foo" [] 
   (let [objs (get-all "foo")]
     (all-obj-page "foo" objs)))
 
-(defpage "/foo/new" [] (get-template "new-foo"))
+(defpage "/foo/new" [] 
+  (get-template "new-foo"))
+
 (defpage [:post "/foo/create"] {:as body} 
   (do
     (create-obj "foo" body)
     (redirect "/foo")))
 
-
 (defpage "/people" [] 
   (let [objs (get-all "people")]
     (all-obj-page "People" objs)))
 
-(defpage "/people/new" [] (get-template "new-people"))
+(defpage "/people/new" [] 
+  (get-template "new-people"))
+
 (defpage [:post "/people/create"] {:as body} 
   (do
     (create-obj "people" body)

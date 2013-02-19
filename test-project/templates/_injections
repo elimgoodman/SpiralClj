@@ -1,1 +1,10 @@
-pages
+{% for model in instances.models %}
+    {% create "new-" model.name|slugify ".jinja" %}
+        <form method='post' action='/{{model.name|slugify}}/create'>
+          {% for field in model.values.model_fields %}
+            {{field.name}}: <input name='{{field.name|slugify}}'/>
+          {% endfor %}
+          <input type='submit' value='Save'/>
+        </form>
+    {% endcreate %}
+{% endfor %}

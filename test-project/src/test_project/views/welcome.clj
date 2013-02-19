@@ -29,6 +29,20 @@
       (m/create-collection! coll)
       (m/insert! coll body))))
 
-{{routes}}
+{% for page in instances.pages %}
+(defpage "{{page.values.url}}" [] (get-template "{{page.name}}"))
+{% endfor %}
 
-{{model-routes}}
+{% for model in instances.models %}
+(defpage "/{{model.name|slugify}}" [] 
+  (let [objs (get-all "{{model.name|slugify}}")]
+    (all-obj-page "{{model.name}}" objs)))
+
+(defpage "/{{model.name|slugify}}/new" [] 
+  (get-template "new-{{model.name|slugify}}"))
+
+(defpage [:post "/{{model.name|slugify}}/create"] {:as body} 
+  (do
+    (create-obj "{{model.name|slugify}}" body)
+    (redirect "/{{model.name|slugify}}")))
+{% endfor %}
