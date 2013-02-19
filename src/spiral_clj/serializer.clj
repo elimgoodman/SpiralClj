@@ -22,6 +22,33 @@
 ;-------------------------------------------------------
 ;-------------------------------------------------------
 
+(defn injector [name from to using]
+  {:from from :to to :using using})
+
+(defn file-injection [filename body]
+  {:filename filename :body body})
+
+(defn instance-injection [name body values]
+  {:name name :body body :values values})
+
+(def injectors [
+  (injector "stylesheets" :styles :files (fn [instance]
+    (let [filename (str (:name instance) ".css")
+          body (:body instance)]
+      (file-injection filename body))))
+
+  (injector "all-objs-pages" :models :pages (fn [instance]
+    (let [name-slug (-> instance :name slugify)
+          name (str "All " (:name instance))
+          body (str "<h1>" (:name instance) "</h1>")
+          values {:url (str "/" name-slug)}]
+      (instance-injection name body values))))
+])
+
+(println injectors)
+;-------------------------------------------------------
+;-------------------------------------------------------
+;-------------------------------------------------------
 (defn slugify [s]
   (let [replace-spaces (fn [s] (string/replace s \space \-))]
     (-> s string/lower-case replace-spaces)))
