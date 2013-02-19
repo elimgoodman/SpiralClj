@@ -296,3 +296,8 @@ a
 (subs "Eoo" 1 -1)
 (.length "fkhjg")
 (- 5 1)
+(def a (read-string "(fn [s] (println s))"))
+a
+(a "hello")
+(eval a)
+((eval a) "hello")

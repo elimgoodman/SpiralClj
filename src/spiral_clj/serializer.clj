@@ -84,34 +84,24 @@
             file-path (str target-dir filename)]
         (spit file-path (:body style))))))
 
-(defn add-handlebars [part]
-  (if (= (.charAt part 0) \")
-    (let [len (.length part)
-          end (- len 1)]
-      (subs part 1 end))
-    (str "{{" part "}}")))
-
-(deftemplatetag "create" "endcreate" [nodes context]
-  (let [create-node (first nodes)
-        args (:args create-node)
-        body-nodes (rest (butlast nodes))
-        groups (ast->groups body-nodes context)
-        parsed (groups->parsed groups)
-        rendered (realize parsed)
-        subbed-parts (map add-handlebars args)
-        rendered-parts (map #(render % context) subbed-parts)
-        file-path (apply str rendered-parts)]
-    (println create-node)
-    {:string rendered}))
-
 (defn inject-model-files [instances]
   (let [template-dir "templates/"
         tmpl-dir (str tmpl-path template-dir)
         target-dir (str target-path template-dir)
         injection-file-path (str tmpl-dir "_injections")
         injection-file (slurp injection-file-path)
-        rendered (render injection-file {:instances instances})]
-    (println "")))
+        injections (read-string injection-file)]
+    (doseq [injection injections]
+      (let [from-fn (-> injection :from eval)
+            instances-to-use (from-fn instances)]
+        (doseq [instance instances-to-use]
+          (let [filename-fn (-> injection :filename eval)
+                util {:slugify slugify} ;uhhhh
+                filename (filename-fn instance util)
+                body (:body injection)
+                file-path (str target-dir filename)
+                rendered (render body instance)]
+            (spit file-path rendered)))))))
 
 (defn inject [instances]
   (do
