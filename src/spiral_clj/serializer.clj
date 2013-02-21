@@ -23,13 +23,20 @@
 ;-------------------------------------------------------
 
 (defn injector [name from to using]
-  {:from from :to to :using using})
+  {:name name :from from :to to :using using})
+
+(defn injection [kind values]
+  {:kind kind :values values})
 
 (defn file-injection [filename body]
-  {:filename filename :body body})
+  (injection :file {:filename filename :body body}))
 
 (defn instance-injection [name body values]
-  {:name name :body body :values values})
+  (injection :instance {:name name :body body :values values}))
+
+(defn slugify [s]
+  (let [replace-spaces (fn [s] (string/replace s \space \-))]
+    (-> s string/lower-case replace-spaces)))
 
 (def injectors [
   (injector "stylesheets" :styles :files (fn [instance]
@@ -45,13 +52,16 @@
       (instance-injection name body values))))
 ])
 
-(println injectors)
+(defn run-injectors [injectors instances]
+  (doseq [injector injectors]
+    (let [from-concept (:from injector)
+          using-fn (:using injector)
+          instances-to-inject (from-concept instances)
+          injections (map using-fn instances-to-inject)]
+      (println injections))))
 ;-------------------------------------------------------
 ;-------------------------------------------------------
 ;-------------------------------------------------------
-(defn slugify [s]
-  (let [replace-spaces (fn [s] (string/replace s \space \-))]
-    (-> s string/lower-case replace-spaces)))
 
 (deftemplatefilter "slugify" [node body arg]
   (slugify body))
@@ -132,6 +142,7 @@
 
 (defn inject [instances]
   (do
+    (run-injectors injectors instances)
     (inject-page-routes instances)
     (inject-template-files instances)
     (inject-model-files instances)
