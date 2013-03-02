@@ -36,6 +36,22 @@
 
 (defpage "" [] (get-template "Space in here"))
 
+(defpage "/foo" [] (get-template "All foo"))
+
+(defpage "/people" [] (get-template "All People"))
+
+(defpage "/foo" [] (get-template "All foo"))
+
+(defpage "/people" [] (get-template "All People"))
+
+(defpage "/foo" [] (get-template "All foo"))
+
+(defpage "/people" [] (get-template "All People"))
+
+(defpage "/foo" [] (get-template "All foo"))
+
+(defpage "/people" [] (get-template "All People"))
+
 
 
 (defpage "/foo" [] 

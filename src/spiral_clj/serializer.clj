@@ -26,7 +26,7 @@
   {:name name :from from :to to :using using})
 
 (defn injection [kind values]
-  {:kind kind :values values})
+  {:kind kind :body values})
 
 (defn file-injection [filename body]
   (injection :file {:filename filename :body body}))
@@ -39,26 +39,35 @@
     (-> s string/lower-case replace-spaces)))
 
 (def injectors [
-  (injector "stylesheets" :styles :files (fn [instance]
-    (let [filename (str (:name instance) ".css")
-          body (:body instance)]
-      (file-injection filename body))))
+  ;(injector "stylesheets" :styles :files (fn [instance]
+    ;(let [filename (str (:name instance) ".css")
+          ;body (:body instance)]
+      ;(file-injection filename body))))
 
   (injector "all-objs-pages" :models :pages (fn [instance]
     (let [name-slug (-> instance :name slugify)
           name (str "All " (:name instance))
           body (str "<h1>" (:name instance) "</h1>")
-          values {:url (str "/" name-slug)}]
+          values {:url (str "/" name-slug) :layout "default"}]
       (instance-injection name body values))))
 ])
 
+(defn instance-injections [instances injector]
+  (let [from-concept (:from injector)
+        using-fn (:using injector)
+        instances-to-inject (from-concept instances)
+        injections (map using-fn instances-to-inject)
+        is-instance-injection (fn [i] (= (:kind i) :instance))
+        instance-injections (filter is-instance-injection injections)
+        new-instances (map #(:body %) instance-injections)]
+    new-instances))
+
+; This only does instance injections for the time being
 (defn run-injectors [injectors instances]
-  (doseq [injector injectors]
-    (let [from-concept (:from injector)
-          using-fn (:using injector)
-          instances-to-inject (from-concept instances)
-          injections (map using-fn instances-to-inject)]
-      (println injections))))
+  (let [injections (partial instance-injections instances)
+        reducer (fn [m i] (assoc m (:to i) (injections i)))]
+    (reduce reducer {} injectors)))
+
 ;-------------------------------------------------------
 ;-------------------------------------------------------
 ;-------------------------------------------------------
@@ -140,9 +149,15 @@
                 rendered (render body instance)]
             (spit file-path rendered)))))))
 
+(defn merge-injected [instances injected]
+  (merge-with concat instances injected))
+
+(defn do-instance-injections [instances]
+  (let [injected (run-injectors injectors instances)]
+    (merge-injected instances injected)))
+
 (defn inject [instances]
   (do
-    (run-injectors injectors instances)
     (inject-page-routes instances)
     (inject-template-files instances)
     (inject-model-files instances)
